@@ -9,26 +9,23 @@ class Kong:
     url = os.environ.get('KONG_URL', 'http://127.0.0.1:8001')
     token = None
 
-    def __init__(self, url=None, session=None, full_response=False,
-                 timeout=None):
-        self.timeout = timeout
+    def __init__(self, url: str=None, session: object=None) -> None:
         self.url = url or self.url
         self.session = session or aiohttp.ClientSession()
-        self.full_response = full_response
         self.services = Services(self)
         self.consumers = Consumers(self)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.url
     __str__ = __repr__
 
-    async def close(self):
+    async def close(self) -> None:
         await self.session.close()
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> object:
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         await self.close()
 
     async def execute(self, url, method=None, headers=None, token=None,

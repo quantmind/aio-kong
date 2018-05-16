@@ -2,21 +2,21 @@
 
 class Component:
 
-    def __init__(self, root, name=None):
+    def __init__(self, root: object, name: str = None) -> None:
         self.root = root
         self.name = name or self.__class__.__name__.lower()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.url
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.__repr__()
 
     @property
-    def url(self):
+    def url(self) -> str:
         return '%s/%s' % (self.root.url, self.name)
 
-    def execute(self, url, method=None, **params):
+    def execute(self, url: str, method: str=None, **params) -> object:
         return self.root.execute(url, method, **params)
 
 
