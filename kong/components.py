@@ -58,10 +58,10 @@ class CrudComponent(Component):
             response.raise_for_status()
 
 
-class Apis(CrudComponent):
+class Services(CrudComponent):
     """Kong API component"""
     def wrap(self, data):
-        return Api(self, data)
+        return Service(self, data)
 
 
 class Consumers(CrudComponent):
@@ -98,7 +98,7 @@ class KongEntity:
         return self.root.execute(url, method, **params)
 
 
-class Api(KongEntity):
+class Service(KongEntity):
 
     @property
     def plugins(self):

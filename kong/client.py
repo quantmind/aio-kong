@@ -2,7 +2,7 @@ import os
 
 import aiohttp
 
-from .components import Apis, Consumers
+from .components import Services, Consumers
 
 
 class Kong:
@@ -15,7 +15,7 @@ class Kong:
         self.url = url or self.url
         self.session = session or aiohttp.ClientSession()
         self.full_response = full_response
-        self.apis = Apis(self)
+        self.services = Services(self)
         self.consumers = Consumers(self)
 
     def __repr__(self):
