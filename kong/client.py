@@ -37,12 +37,11 @@ class Kong:
         if token:
             headers['Authorization'] = 'Bearer %s' % token
         headers['Accept'] = 'application/json, text/*; q=0.5'
-        kw['timeout'] = timeout or self.timeout
         response = await self.session.request(
             method, url, headers=headers, **kw
         )
         response.raise_for_status()
-        if response.status_code == 204:
+        if response.status == 204:
             return True
-        data = response.json()
+        data = await response.json()
         return wrap(data) if wrap else data

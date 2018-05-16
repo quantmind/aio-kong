@@ -109,8 +109,8 @@ class Service(KongEntity):
         return self.data['name']
 
     @property
-    def hosts(self):
-        return self.data.get('hosts')
+    def host(self):
+        return self.data.get('host')
 
 
 class Plugins(CrudComponent):
