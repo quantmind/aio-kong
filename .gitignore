@@ -16,3 +16,6 @@ dist
 # files
 .env
 *.log
+
+# Mac
+.DS_Store
