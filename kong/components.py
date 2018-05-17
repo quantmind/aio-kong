@@ -1,3 +1,4 @@
+import asyncio
 
 
 class Component:
@@ -11,6 +12,10 @@ class Component:
 
     def __str__(self) -> str:
         return self.__repr__()
+
+    @property
+    def cli(self):
+        return self.root.cli
 
     @property
     def url(self) -> str:
@@ -84,6 +89,10 @@ class KongEntity:
         self.data = data
 
     @property
+    def cli(self):
+        return self.root.cli
+
+    @property
     def id(self):
         return self.data['id']
 
@@ -105,6 +114,10 @@ class Service(KongEntity):
         return Plugins(self)
 
     @property
+    def routes(self):
+        return ServiceRoutes(self, 'routes')
+
+    @property
     def name(self):
         return self.data['name']
 
@@ -112,9 +125,36 @@ class Service(KongEntity):
     def host(self):
         return self.data.get('host')
 
+    def delete(self):
+        return self.root.delete(self.id)
+
 
 class Plugins(CrudComponent):
     pass
+
+
+class ServiceRoutes(CrudComponent):
+
+    @property
+    def url(self) -> str:
+        return '%s/%s' % (self.cli.url, self.name)
+
+    def get_list(self, **params):
+        url = '%s/%s' % (self.root.url, self.name)
+        return self.execute(url, params=params, wrap=self.wrap_list)
+
+    def create(self, skip_error=None, **params):
+        params['service'] = dict(id=self.root.id)
+        return self.execute(self.url, 'post', json=params,
+                            wrap=self.wrap, skip_error=skip_error)
+
+    async def delete_all(self):
+        coros = []
+        async for route in self.get_list():
+            coros.append(self.delete(route['id']))
+        if coros:
+            await asyncio.gather(*coros)
+        return len(coros)
 
 
 class Consumer(KongEntity):

@@ -19,6 +19,10 @@ class Kong:
         return self.url
     __str__ = __repr__
 
+    @property
+    def cli(self):
+        return self
+
     async def close(self) -> None:
         await self.session.close()
 

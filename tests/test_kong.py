@@ -24,7 +24,9 @@ async def cli(loop):
 
 
 async def cleanup(cli):
-    await cli.services.delete('test')
+    s = await cli.services.get('test')
+    await s.routes.delete_al()
+    await s.delete()
 
 
 def test_client(cli):
@@ -32,13 +34,23 @@ def test_client(cli):
 
 
 async def test_create_service(cli):
-    c = await cli.services.create(name='test', host='example.com', port=8080)
+    c = await cli.services.create(
+        name='test', host='example.upstream', port=8080
+    )
     assert c.name == 'test'
-    assert c.host == 'example.com'
+    assert c.host == 'example.upstream'
     assert c.id
 
 
 async def test_update_service(cli):
-    c = await cli.services.update('test', host='test.com')
+    c = await cli.services.update('test', host='test.upstream')
     assert c.name == 'test'
-    assert c.host == 'test.com'
+    assert c.host == 'test.upstream'
+
+
+async def test_routes(cli):
+    c = await cli.services.get('test')
+    routes = await c.routes.get_list()
+    assert len(routes) == 0
+    route = await c.routes.create(hosts=['example.com'])
+    assert route['service']['id'] == c.id
