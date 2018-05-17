@@ -68,6 +68,23 @@ class Services(CrudComponent):
     def wrap(self, data):
         return Service(self, data)
 
+    async def apply_json(self, manifest):
+        if not isinstance(manifest, list):
+            manifest = [manifest]
+        for srv in manifest:
+            if not isinstance(srv, dict):
+                raise TypeError('Expected a dict got %s' % type(srv).__name__)
+            name = srv.get('name')
+            if not name:
+                raise ValueError('name is required')
+            config = srv.get('config')
+            if not config:
+                raise ValueError('config dictionary for %s is required' % name)
+            if await self.has('name'):
+                await self.update(name, **config)
+            else:
+                await self.create(name=name, **config)
+
 
 class Consumers(CrudComponent):
 
@@ -108,7 +125,8 @@ class KongEntity:
 
 
 class Service(KongEntity):
-
+    """Object representing a service
+    """
     @property
     def plugins(self):
         return Plugins(self)
