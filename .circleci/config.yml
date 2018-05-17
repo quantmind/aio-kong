@@ -3,13 +3,13 @@ jobs:
   tests:
     docker:
       - image: circleci/python:3.6
-      - image: kong:0.13
       - image: postgres:10
+      - image: kong:0.13
     steps:
       - checkout
       - run:
           name: install
-          command: ./dev/install.sh
+          command: sudo ./dev/install.sh
       - run:
           name: flake8
           command: flake8
