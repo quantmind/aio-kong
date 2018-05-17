@@ -134,7 +134,8 @@ class Plugins(CrudComponent):
 
 
 class ServiceRoutes(CrudComponent):
-
+    """Routes associates with a service
+    """
     @property
     def url(self) -> str:
         return '%s/%s' % (self.cli.url, self.name)
@@ -149,12 +150,11 @@ class ServiceRoutes(CrudComponent):
                             wrap=self.wrap, skip_error=skip_error)
 
     async def delete_all(self):
-        coros = []
-        async for route in self.get_list():
-            coros.append(self.delete(route['id']))
+        coros = [self.delete(r['id']) for r in await self.get_list()]
         if coros:
             await asyncio.gather(*coros)
-        return len(coros)
+            return len(coros)
+        return 0
 
 
 class Consumer(KongEntity):

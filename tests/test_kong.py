@@ -25,7 +25,7 @@ async def cli(loop):
 
 async def cleanup(cli):
     s = await cli.services.get('test')
-    await s.routes.delete_al()
+    await s.routes.delete_all()
     await s.delete()
 
 
