@@ -1,4 +1,18 @@
+from itertools import zip_longest
 import asyncio
+
+from .utils import as_list
+
+
+class KongError(Exception):
+
+    def __init__(self, response, msg=''):
+        super().__init__(msg)
+        self.response = response
+
+    @property
+    def status(self):
+        return self.response.status
 
 
 class Component:
@@ -24,6 +38,9 @@ class Component:
     def execute(self, url: str, method: str=None, **params) -> object:
         return self.root.execute(url, method, **params)
 
+    def apply_json(self, data):
+        raise NotImplementedError
+
 
 class CrudComponent(Component):
 
@@ -34,7 +51,7 @@ class CrudComponent(Component):
         return self.execute('%s/%s' % (self.url, id), wrap=self.wrap)
 
     def has(self, id):
-        return self.execute('%s/%s' % (self.url, id), 'head',
+        return self.execute('%s/%s' % (self.url, id), 'get',
                             callback=self.head)
 
     def create(self, skip_error=None, **params):
@@ -54,13 +71,13 @@ class CrudComponent(Component):
     def wrap(self, data):
         return data
 
-    def head(self, response):
-        if response.status_code == 404:
+    async def head(self, response):
+        if response.status == 404:
             return False
-        elif response.status_code == 200:
+        elif response.status == 200:
             return True
         else:
-            response.raise_for_status()
+            raise KongError(response)
 
 
 class Services(CrudComponent):
@@ -68,22 +85,34 @@ class Services(CrudComponent):
     def wrap(self, data):
         return Service(self, data)
 
-    async def apply_json(self, manifest):
-        if not isinstance(manifest, list):
-            manifest = [manifest]
-        for srv in manifest:
-            if not isinstance(srv, dict):
-                raise TypeError('Expected a dict got %s' % type(srv).__name__)
-            name = srv.get('name')
-            if not name:
-                raise ValueError('name is required')
-            config = srv.get('config')
-            if not config:
-                raise ValueError('config dictionary for %s is required' % name)
-            if await self.has('name'):
-                await self.update(name, **config)
-            else:
-                await self.create(name=name, **config)
+    async def remove(self, id):
+        print('getting %s' % id)
+        s = await self.get(id)
+        print('removing %s routes' % id)
+        await s.routes.delete_all()
+        print('removing %s' % id)
+        await self.delete(id)
+
+    async def apply_json(self, data):
+        """Apply a JSON data object for a service
+        """
+        name = data.get('name')
+        if not name:
+            raise ValueError('name is required')
+        config = data.get('config')
+        if not config:
+            raise ValueError('config dictionary for %s is required' % name)
+
+        if await self.has(name):
+            srv = await self.update(name, **config)
+        else:
+            srv = await self.create(name=name, **config)
+
+        srv.data['routes'] = await srv.routes.apply_json(
+            data.get('routes') or {}
+        )
+
+        return srv
 
 
 class Consumers(CrudComponent):
@@ -143,9 +172,6 @@ class Service(KongEntity):
     def host(self):
         return self.data.get('host')
 
-    def delete(self):
-        return self.root.delete(self.id)
-
 
 class Plugins(CrudComponent):
     pass
@@ -168,11 +194,30 @@ class ServiceRoutes(CrudComponent):
                             wrap=self.wrap, skip_error=skip_error)
 
     async def delete_all(self):
-        coros = [self.delete(r['id']) for r in await self.get_list()]
-        if coros:
-            await asyncio.gather(*coros)
-            return len(coros)
-        return 0
+        routes = await self.get_list()
+        for route in routes:
+            await self.delete(route['id'])
+        return len(routes)
+
+    async def apply_json(self, data):
+        if not isinstance(data, list):
+            data = [data]
+        routes = await self.get_list()
+        result = []
+        for d, route in zip_longest(data, routes):
+            if not d:
+                if route:
+                    await self.delete(route['id'])
+                continue
+            as_list('hosts', d)
+            as_list('paths', d)
+            as_list('methods', d)
+            if not route:
+                route = await self.create(**d)
+            else:
+                route = await self.update(route['id'], **d)
+            result.append(route)
+        return result
 
 
 class Consumer(KongEntity):

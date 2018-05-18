@@ -1,8 +1,9 @@
 import os
+import json
 
 import aiohttp
 
-from .components import Services, Consumers
+from .components import Services, Consumers, KongError
 
 
 class Kong:
@@ -44,8 +45,28 @@ class Kong:
         response = await self.session.request(
             method, url, headers=headers, **kw
         )
-        response.raise_for_status()
+        if callback:
+            return await callback(response)
         if response.status == 204:
             return True
         data = await response.json()
+        if response.status >= 400:
+            raise KongError(response, json.dumps(data, indent=4))
+        response.raise_for_status()
         return wrap(data) if wrap else data
+
+    async def apply_json(self, srv):
+        if not isinstance(srv, dict):
+            raise TypeError('Expected a dict got %s' % type(srv).__name__)
+        for name, data in srv.items():
+            if not isinstance(data, list):
+                data = [data]
+            o = getattr(self, name)
+            if not o:
+                raise ValueError('Kong object %s not available' % name)
+            for entry in data:
+                if not isinstance(entry, dict):
+                    raise TypeError(
+                        'Expected a dict got %s' % type(entry).__name__
+                    )
+                await o.apply_json(entry)
