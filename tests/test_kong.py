@@ -7,9 +7,10 @@ import yaml
 
 import aiohttp
 
-from kong.client import Kong
+from kong.client import Kong, KongError
 
 
+TESTS = ('test', 'foo')
 PATH = os.path.dirname(__file__)
 
 
@@ -30,9 +31,12 @@ async def cli(loop):
 
 
 async def cleanup(cli):
-    s = await cli.services.get('test')
-    await s.routes.delete_all()
-    await s.delete()
+    for name in TESTS:
+        try:
+            await cli.services.remove(name)
+        except KongError as exc:
+            if not exc.status == 404:
+                raise
 
 
 def test_client(cli):
@@ -66,3 +70,6 @@ async def test_json(cli):
     with open(os.path.join(PATH, 'test.yml')) as fp:
         manifest = yaml.load(fp)
     await cli.apply_json(manifest)
+    srv = await cli.services.get('foo')
+    routes = await srv.routes.get_list()
+    assert len(routes) == 2

@@ -6,8 +6,6 @@ services:
     routes:
       - paths: "/"
         hosts: "api.foo.com"
-      - paths: "/spec"
-        hosts: "doc.foo.com"
     plugins:
       - name: cors
         config:
