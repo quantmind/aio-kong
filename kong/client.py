@@ -49,3 +49,15 @@ class Kong:
             return True
         data = await response.json()
         return wrap(data) if wrap else data
+
+    async def apply_json(self, srv):
+        if not isinstance(srv, dict):
+            raise TypeError('Expected a dict got %s' % type(srv).__name__)
+        for name, data in srv.items():
+            if not isinstance(data, dict):
+                raise TypeError('Expected a dict got %s' % type(data).__name__)
+            path = srv.get('path')
+            o = getattr(self, path)
+            if not o:
+                raise ValueError('Kong object %s not available' % name)
+            await o.apply_json(data)

@@ -1,0 +1,15 @@
+services:
+  - name: test
+    ensure: "present"
+    config:
+      upstream_url: "test.local"
+    routes:
+      - hosts:
+          - "api.test.com"
+    plugins:
+      - name: cors
+        config:
+          origins: "*"
+      - name: rate-limiting
+        config:
+          minute: 30

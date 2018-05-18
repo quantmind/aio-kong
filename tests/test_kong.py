@@ -1,10 +1,16 @@
+import os
 import asyncio
 
 import pytest
 
+import yaml
+
 import aiohttp
 
 from kong.client import Kong
+
+
+PATH = os.path.dirname(__file__)
 
 
 @pytest.fixture(scope='module')
@@ -54,3 +60,9 @@ async def test_routes(cli):
     assert len(routes) == 0
     route = await c.routes.create(hosts=['example.com'])
     assert route['service']['id'] == c.id
+
+
+async def test_json(cli):
+    with open(os.path.join(PATH, 'test.yml')) as fp:
+        manifest = yaml.load(fp)
+    await cli.apply_json(manifest)
