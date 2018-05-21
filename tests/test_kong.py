@@ -90,3 +90,13 @@ async def test_json2(cli):
     # check plugins
     plugins = await srv.plugins.get_list()
     assert len(plugins) == 1
+
+
+async def test_add_certificate(cli):
+    c = await cli.certificates.create(
+        cert='-----BEGIN CERTIFICATE-----...',
+        key='-----BEGIN RSA PRIVATE KEY-----...'
+    )
+    assert c.id
+    assert len(c.data['snis']) == 0
+    await cli.certificates.delete(c.id)
