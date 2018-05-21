@@ -1,5 +1,4 @@
 from itertools import zip_longest
-import asyncio
 
 from .utils import as_list
 
