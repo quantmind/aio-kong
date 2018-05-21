@@ -6,6 +6,7 @@ import aiohttp
 from .components import KongError
 from .services import Services
 from .consumers import Consumers
+from .certificates import Certificates
 
 
 class Kong:
@@ -17,6 +18,7 @@ class Kong:
         self.session = session or aiohttp.ClientSession()
         self.services = Services(self)
         self.consumers = Consumers(self)
+        self.certificates = Certificates(self)
 
     def __repr__(self) -> str:
         return self.url
