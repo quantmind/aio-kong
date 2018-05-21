@@ -1,7 +1,9 @@
 version: 2
 jobs:
   tests:
-    machine: true  # it is not possible to run postgres container that will be exposed to kong container so that we can use kong port in tests: https://discuss.circleci.com/t/why-circleci-2-0-does-not-support-mounting-folders/11605
+    # it is not possible to connect to kong that is connected to other container - postgres
+    # https://discuss.circleci.com/t/why-circleci-2-0-does-not-support-mounting-folders/11605
+    machine: true
     steps:
       - checkout
       - run: docker run --name postgres -d postgres:10
