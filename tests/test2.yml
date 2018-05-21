@@ -10,6 +10,3 @@ services:
       - name: cors
         config:
           origins: "*"
-      - name: rate-limiting
-        config:
-          minute: 30

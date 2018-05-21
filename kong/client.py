@@ -3,7 +3,9 @@ import json
 
 import aiohttp
 
-from .components import Services, Consumers, KongError
+from .components import KongError
+from .services import Services
+from .consumers import Consumers
 
 
 class Kong:

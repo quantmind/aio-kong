@@ -73,3 +73,20 @@ async def test_json(cli):
     srv = await cli.services.get('foo')
     routes = await srv.routes.get_list()
     assert len(routes) == 2
+    #
+    # check plugins
+    plugins = await srv.plugins.get_list()
+    assert len(plugins) == 2
+
+
+async def test_json2(cli):
+    with open(os.path.join(PATH, 'test2.yml')) as fp:
+        manifest = yaml.load(fp)
+    await cli.apply_json(manifest)
+    srv = await cli.services.get('foo')
+    routes = await srv.routes.get_list()
+    assert len(routes) == 1
+    #
+    # check plugins
+    plugins = await srv.plugins.get_list()
+    assert len(plugins) == 1
