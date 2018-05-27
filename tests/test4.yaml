@@ -1,0 +1,8 @@
+plugins:
+  - name: correlation-id
+    config:
+      header_name: X-Request-ID
+      generator: uuid#counter
+  - name: rate-limiting
+    config:
+      minute: 30

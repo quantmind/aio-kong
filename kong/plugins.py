@@ -1,12 +1,7 @@
-from .components import ServiceEntity, KongError
+from .components import CrudComponent, ServiceEntity, KongError
 
 
-class ServicePlugins(ServiceEntity):
-
-    def create(self, skip_error=None, **params):
-        params['service_id'] = self.root.id
-        return self.execute(self.url, 'post', json=params,
-                            wrap=self.wrap, skip_error=skip_error)
+class PluginJsonApply:
 
     async def apply_json(self, data):
         if not isinstance(data, list):
@@ -29,3 +24,15 @@ class ServicePlugins(ServiceEntity):
         for entry in plugins.values():
             await self.delete(entry['id'])
         return result
+
+
+class Plugins(PluginJsonApply, CrudComponent):
+    pass
+
+
+class ServicePlugins(PluginJsonApply, ServiceEntity):
+
+    def create(self, skip_error=None, **params):
+        params['service_id'] = self.root.id
+        return self.execute(self.url, 'post', json=params,
+                            wrap=self.wrap, skip_error=skip_error)

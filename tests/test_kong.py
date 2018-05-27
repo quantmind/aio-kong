@@ -108,6 +108,11 @@ async def test_hedge_cases(cli):
 
     with pytest.raises(TypeError):
         with open(os.path.join(PATH, 'test3.yaml')) as fp:
-            cli.apply_json(yaml.load(fp))
+            await cli.apply_json(yaml.load(fp))
 
     assert str(cli) == cli.url
+
+
+async def test_json_plugins(cli):
+    with open(os.path.join(PATH, 'test4.yaml')) as fp:
+        await cli.apply_json(yaml.load(fp))

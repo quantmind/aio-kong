@@ -11,6 +11,24 @@ def read(name):
         return fp.read()
 
 
+def requirements(name):
+    install_requires = []
+    dependency_links = []
+
+    for line in read(name).split('\n'):
+        if line.startswith('-e '):
+            link = line[3:].strip()
+            if link == '.':
+                continue
+            dependency_links.append(link)
+            line = link.split('=')[1]
+        line = line.strip()
+        if line:
+            install_requires.append(line)
+
+    return install_requires, dependency_links
+
+
 meta = dict(
     version=kong.__version__,
     description=kong.__doc__,
@@ -25,7 +43,12 @@ meta = dict(
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['aiohttp'],
+    install_requires=requirements('dev/requirements.txt'),
+    entry_points={
+        "console_scripts": [
+            "kong = kong.cli:main"
+        ]
+    },
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',

@@ -1,11 +1,5 @@
 #
 # asyncio stack
 aiohttp
-#
-# testing and linting
-mypy
-pytest
-pytest-cov
-pytest-aiohttp
-flake8
+click
 pyyaml
