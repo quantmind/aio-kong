@@ -1,4 +1,3 @@
-foo:
-  name: foo
-  config:
-    host: "foo.local"
+plugins:
+  name: correlation-id
+  config: "this should be a dictionary"
