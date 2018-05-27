@@ -1,0 +1,3 @@
+services:
+  name: correlation-id
+  config: "this should be a dictionary"

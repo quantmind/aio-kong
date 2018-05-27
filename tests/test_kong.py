@@ -67,7 +67,7 @@ async def test_routes(cli):
 
 
 async def test_json(cli):
-    with open(os.path.join(PATH, 'test.yml')) as fp:
+    with open(os.path.join(PATH, 'test.yaml')) as fp:
         manifest = yaml.load(fp)
     await cli.apply_json(manifest)
     srv = await cli.services.get('foo')
@@ -80,7 +80,7 @@ async def test_json(cli):
 
 
 async def test_json2(cli):
-    with open(os.path.join(PATH, 'test2.yml')) as fp:
+    with open(os.path.join(PATH, 'test2.yaml')) as fp:
         manifest = yaml.load(fp)
     await cli.apply_json(manifest)
     srv = await cli.services.get('foo')
@@ -100,3 +100,19 @@ async def test_add_certificate(cli):
     assert c.id
     assert len(c.data['snis']) == 0
     await cli.certificates.delete(c.id)
+
+
+async def test_hedge_cases(cli):
+    with pytest.raises(TypeError):
+        await cli.apply_json([])
+
+    with pytest.raises(TypeError):
+        with open(os.path.join(PATH, 'test3.yaml')) as fp:
+            await cli.apply_json(yaml.load(fp))
+
+    assert str(cli) == cli.url
+
+
+async def test_json_plugins(cli):
+    with open(os.path.join(PATH, 'test4.yaml')) as fp:
+        await cli.apply_json(yaml.load(fp))
