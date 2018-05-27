@@ -100,3 +100,18 @@ async def test_add_certificate(cli):
     assert c.id
     assert len(c.data['snis']) == 0
     await cli.certificates.delete(c.id)
+
+
+async def test_hedge_cases(cli):
+    with pytest.raises(TypeError):
+        await cli.apply_json([])
+
+    with pytest.raises(ValueError):
+        with open(os.path.join(PATH, 'test3.yml')) as fp:
+            cli.apply_json(yaml.load(fp))
+
+    with pytest.raises(TypeError):
+        with open(os.path.join(PATH, 'test4.yml')) as fp:
+            cli.apply_json(yaml.load(fp))
+
+    assert str(cli) == cli.url

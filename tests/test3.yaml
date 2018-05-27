@@ -1,0 +1,4 @@
+foo:
+  name: foo
+  config:
+    host: "foo.local"
