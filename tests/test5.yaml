@@ -1,0 +1,4 @@
+plugins:
+    config:
+      header_name: X-Request-ID
+      generator: uuid#counter

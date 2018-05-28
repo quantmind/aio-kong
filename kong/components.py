@@ -1,14 +1,20 @@
 
 
 class KongError(Exception):
+    pass
 
-    def __init__(self, response, msg=''):
-        super().__init__(msg)
+
+class KongResponseError(KongError):
+    def __init__(self, response, message=''):
         self.response = response
+        self.message = message
 
     @property
     def status(self):
         return self.response.status
+
+    def __str__(self):
+        return f'{self.response.status}: {self.message}'
 
 
 class Component:
@@ -73,7 +79,7 @@ class CrudComponent(Component):
         elif response.status == 200:
             return True
         else:
-            raise KongError(response)
+            raise KongResponseError(response)
 
 
 class KongEntity:

@@ -1,4 +1,4 @@
-from .components import CrudComponent, KongEntity
+from .components import CrudComponent, KongEntity, KongError
 from .routes import ServiceRoutes
 from .plugins import ServicePlugins
 
@@ -19,28 +19,34 @@ class Services(CrudComponent):
     async def apply_json(self, data):
         """Apply a JSON data object for a service
         """
-        name = data.get('name')
-        if not name:
-            raise ValueError('name is required')
-        config = data.get('config')
-        if not config:
-            raise ValueError('config dictionary for %s is required' % name)
+        if not isinstance(data, list):
+            data = [data]
+        result = []
+        for entry in data:
+            if not isinstance(entry, dict):
+                raise KongError('dictionary required')
+            name = entry.get('name')
+            if not name:
+                raise KongError('name is required')
+            config = entry.get('config')
+            if not isinstance(config, dict):
+                raise KongError('config dictionary for %s is required' % name)
 
-        if await self.has(name):
-            srv = await self.update(name, **config)
-        else:
-            srv = await self.create(name=name, **config)
+            if await self.has(name):
+                srv = await self.update(name, **config)
+            else:
+                srv = await self.create(name=name, **config)
 
-        srv.data['routes'] = await srv.routes.apply_json(
-            data.get('routes') or []
-        )
+            routes = entry.get('routes')
+            if routes:
+                srv.data['routes'] = await srv.routes.apply_json(routes)
 
-        plugins = data.get('plugins')
+            plugins = entry.get('plugins')
+            if plugins:
+                srv.data['plugins'] = await srv.plugins.apply_json(plugins)
 
-        if plugins:
-            srv.data['plugins'] = await srv.plugins.apply_json(plugins)
-
-        return srv
+            result.append(srv)
+        return result
 
 
 class Service(KongEntity):
