@@ -103,10 +103,10 @@ async def test_add_certificate(cli):
 
 
 async def test_hedge_cases(cli):
-    with pytest.raises(TypeError):
+    with pytest.raises(KongError):
         await cli.apply_json([])
 
-    with pytest.raises(TypeError):
+    with pytest.raises(KongError):
         with open(os.path.join(PATH, 'test3.yaml')) as fp:
             await cli.apply_json(yaml.load(fp))
 

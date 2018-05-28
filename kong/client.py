@@ -3,11 +3,18 @@ import json
 
 import aiohttp
 
-from .components import KongError
+from .components import KongError, KongResponseError
 from .services import Services
 from .plugins import Plugins
 from .consumers import Consumers
 from .certificates import Certificates
+
+
+__all__ = [
+    'Kong',
+    'KongError',
+    'KongResponseError'
+]
 
 
 class Kong:
@@ -53,22 +60,19 @@ class Kong:
             return True
         data = await response.json()
         if response.status >= 400:
-            raise KongError(response, json.dumps(data, indent=4))
+            raise KongResponseError(response, json.dumps(data, indent=4))
         response.raise_for_status()
         return wrap(data) if wrap else data
 
     async def apply_json(self, srv):
         if not isinstance(srv, dict):
-            raise TypeError('Expected a dict got %s' % type(srv).__name__)
+            raise KongError('Expected a dict got %s' % type(srv).__name__)
+        result = {}
         for name, data in srv.items():
             if not isinstance(data, list):
                 data = [data]
             o = getattr(self, name)
             if not o:
-                raise ValueError('Kong object %s not available' % name)
-            for entry in data:
-                if not isinstance(entry, dict):
-                    raise TypeError(
-                        'Expected a dict got %s' % type(entry).__name__
-                    )
-                await o.apply_json(entry)
+                raise KongError('Kong object %s not available' % name)
+            result[name] = await o.apply_json(data)
+        return result
