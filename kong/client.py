@@ -64,11 +64,11 @@ class Kong:
         response.raise_for_status()
         return wrap(data) if wrap else data
 
-    async def apply_json(self, srv):
-        if not isinstance(srv, dict):
-            raise KongError('Expected a dict got %s' % type(srv).__name__)
+    async def apply_json(self, config):
+        if not isinstance(config, dict):
+            raise KongError('Expected a dict got %s' % type(config).__name__)
         result = {}
-        for name, data in srv.items():
+        for name, data in config.items():
             if not isinstance(data, list):
                 data = [data]
             o = getattr(self, name)

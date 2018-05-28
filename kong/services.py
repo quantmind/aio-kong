@@ -27,7 +27,7 @@ class Services(CrudComponent):
                 raise KongError('dictionary required')
             name = entry.get('name')
             if not name:
-                raise KongError('name is required')
+                raise KongError('Service name is required')
             config = entry.get('config')
             if not isinstance(config, dict):
                 raise KongError('config dictionary for %s is required' % name)
@@ -45,7 +45,7 @@ class Services(CrudComponent):
             if plugins:
                 srv.data['plugins'] = await srv.plugins.apply_json(plugins)
 
-            result.append(srv)
+            result.append(srv.data)
         return result
 
 

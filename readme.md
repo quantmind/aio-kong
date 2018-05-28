@@ -16,3 +16,23 @@ To run tests, clone and
 ./dev/install.sh
 pytest --cov
 ```
+## Client
+
+The client can be imported via
+```python
+from kong.client import Kong
+```
+
+In a coroutine::
+```python
+async with Kong() as cli:
+    services = await cli.services.get_list()
+    print(json.dumps(services, indent=4))
+```
+
+## Command line tool
+
+The library install the ``kong`` command line tool for uploading kong configuration files.
+```
+kong --yaml config.yaml
+```
