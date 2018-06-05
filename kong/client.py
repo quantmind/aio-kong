@@ -78,10 +78,9 @@ class Kong:
         return result
 
     async def get_service_plugin(self, service_name, plugin_name):
-        services = await self.services.get_list(name=service_name)
-        if not services:
+        service = await self.services.get(service_name)
+        if not service:
             raise KongError('Service %s not found' % service_name)
-        service = services[0]
         plugins = await service.plugins.get_list(name=plugin_name)
         if not plugins:
             raise KongError('Plugin %s not found' % plugin_name)

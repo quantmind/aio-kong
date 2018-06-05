@@ -1,6 +1,5 @@
 from .components import CrudComponent, ServiceEntity, KongError, KongEntity
 
-
 class PluginJsonApply:
 
     async def apply_json(self, data):
@@ -64,16 +63,11 @@ class JWTPlugin(Plugin):
         )
         return data['key']
 
-    async def get_consumer_token(self, consumer):
-        response = await self.execute('%s/jwt' % consumer.url, method='GET')
-        if not (response and response['data']):
-            raise KongError('Consumer %s does not have tokens' % consumer.id)
-        return response['data'][0]['key']
-
     def get_consumer_by_token(self, jwt):
         root = self._get_kong_client()
         return self.execute(
-            '%s/jwts/%s/consumer' % (root.url, jwt), method='GET'
+            '%s/jwts/%s/consumer' % (root.url, jwt), method='GET',
+            wrap=root.consumers.wrap
         )
 
     def remove_consumer_token(self, consumer, jwt):

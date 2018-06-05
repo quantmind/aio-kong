@@ -10,3 +10,4 @@ services:
       - name: cors
         config:
           origins: "*"
+      - name: jwt
