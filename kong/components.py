@@ -88,6 +88,9 @@ class KongEntity:
         self.root = root
         self.data = data
 
+    def __getitem__(self, item):
+        return self.data[item]
+
     @property
     def cli(self):
         return self.root.cli
