@@ -76,3 +76,13 @@ class Kong:
                 raise KongError('Kong object %s not available' % name)
             result[name] = await o.apply_json(data)
         return result
+
+    async def get_service_plugin(self, service_name, plugin_name):
+        services = await self.services.get_list(name=service_name)
+        if not services:
+            raise KongError('Service %s not found' % service_name)
+        service = services[0]
+        plugins = await service.plugins.get_list(name=plugin_name)
+        if not plugins:
+            raise KongError('Plugin %s not found' % plugin_name)
+        return plugins[0]
