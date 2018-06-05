@@ -1,5 +1,6 @@
 from .components import CrudComponent, ServiceEntity, KongError, KongEntity
 
+
 class PluginJsonApply:
 
     async def apply_json(self, data):
@@ -32,7 +33,7 @@ class Plugins(PluginJsonApply, CrudComponent):
 class ServicePlugins(PluginJsonApply, ServiceEntity):
 
     def wrap(self, data):
-        return Plugin.factory(self, data)
+        return Plugin.factory(self.cli, data)
 
     def create(self, skip_error=None, **params):
         params['service_id'] = self.root.id
@@ -51,12 +52,6 @@ class Plugin(KongEntity):
 
 class JWTPlugin(Plugin):
 
-    def _get_kong_client(self):
-        root = self.root
-        while hasattr(root, 'root'):
-            root = root.root
-        return root
-
     async def create_consumer_token(self, consumer, **params):
         data = await self.execute(
             '%s/jwt' % consumer.url, method='POST', json=params
@@ -64,14 +59,12 @@ class JWTPlugin(Plugin):
         return data['key']
 
     def get_consumer_by_token(self, jwt):
-        root = self._get_kong_client()
         return self.execute(
-            '%s/jwts/%s/consumer' % (root.url, jwt), method='GET',
-            wrap=root.consumers.wrap
+            '%s/jwts/%s/consumer' % (self.root.url, jwt), method='GET',
+            wrap=self.root.consumers.wrap
         )
 
     def remove_consumer_token(self, consumer, jwt):
         if isinstance(consumer, dict):
-            root = self._get_kong_client()
-            consumer = root.consumers.wrap(consumer)
+            consumer = self.root.consumers.wrap(consumer)
         return self.execute('%s/jwt/%s' % (consumer.url, jwt), method='DELETE')
