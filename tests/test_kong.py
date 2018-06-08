@@ -85,18 +85,3 @@ async def test_hedge_cases(cli):
 async def test_json_plugins(cli):
     with open(os.path.join(PATH, 'test4.yaml')) as fp:
         await cli.apply_json(yaml.load(fp))
-
-
-async def test_get_service_plugin(cli):
-    with open(os.path.join(PATH, 'test2.yaml')) as fp:
-        manifest = yaml.load(fp)
-    await cli.apply_json(manifest)
-
-    await cli.get_service_plugin('foo', 'jwt')
-    await cli.get_service_plugin('foo', 'cors')
-
-    with pytest.raises(KongError):
-        await cli.get_service_plugin('foo', 'noplugin')
-
-    with pytest.raises(KongError):
-        await cli.get_service_plugin('noservice', 'jwt')

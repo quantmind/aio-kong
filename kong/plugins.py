@@ -27,7 +27,15 @@ class PluginJsonApply:
 
 
 class Plugins(PluginJsonApply, CrudComponent):
-    pass
+
+    def wrap(self, data):
+        return Plugin.factory(self.cli, data)
+
+    async def get_for_service(self, plugin_name, service_id):
+        plugins = await self.get_list(name=plugin_name, service_id=service_id)
+        if not plugins:
+            raise KongError('Plugin %s not found' % plugin_name)
+        return plugins[0]
 
 
 class ServicePlugins(PluginJsonApply, ServiceEntity):
@@ -52,19 +60,18 @@ class Plugin(KongEntity):
 
 class JWTPlugin(Plugin):
 
-    async def create_consumer_token(self, consumer, **params):
-        data = await self.execute(
+    def create_consumer_jwt(self, consumer, **params):
+        return self.execute(
             '%s/jwt' % consumer.url, method='POST', json=params
         )
-        return data['key']
 
-    def get_consumer_by_token(self, jwt):
+    def get_consumer_by_jwt(self, jwt):
         return self.execute(
             '%s/jwts/%s/consumer' % (self.root.url, jwt), method='GET',
             wrap=self.root.consumers.wrap
         )
 
-    def remove_consumer_token(self, consumer, jwt):
+    def remove_consumer_jwt(self, consumer, jwt):
         if isinstance(consumer, dict):
             consumer = self.root.consumers.wrap(consumer)
         return self.execute('%s/jwt/%s' % (consumer.url, jwt), method='DELETE')
