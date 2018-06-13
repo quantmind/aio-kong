@@ -20,7 +20,7 @@ class PluginJsonApply:
             else:
                 plugin = await self.create(**entry)
 
-            result.append(plugin)
+            result.append(plugin.data)
         for entry in plugins.values():
             await self.delete(entry['id'])
         return result
