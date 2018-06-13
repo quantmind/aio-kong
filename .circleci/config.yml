@@ -44,7 +44,7 @@ jobs:
           command: sudo python setup.py install sdist bdist_wheel
       - run:
           name: agiletoolkit
-          command: ./dev/install.sh
+          command: sudo ./dev/install.sh
       - run:
           name: validate version
           command: agilekit git validate
