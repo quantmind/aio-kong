@@ -49,6 +49,23 @@ class ServicePlugins(PluginJsonApply, ServiceEntity):
                             wrap=self.wrap, skip_error=skip_error)
 
 
+class RoutePlugins(PluginJsonApply, CrudComponent):
+    """Plugins associated with a Route
+    """
+    def wrap(self, data):
+        return Plugin.factory(self.cli, data)
+
+    def get_list(self, **params):
+        url = '%s/%s' % (self.cli.url, self.name)
+        params['route_id'] = self.root.id
+        return self.execute(url, params=params, wrap=self.wrap_list)
+
+    def create(self, skip_error=None, **params):
+        params['route_id'] = self.root.id
+        return self.execute(self.url, 'post', json=params,
+                            wrap=self.wrap, skip_error=skip_error)
+
+
 class Plugin(KongEntity):
 
     @classmethod

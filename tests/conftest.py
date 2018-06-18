@@ -5,7 +5,7 @@ import aiohttp
 from kong.client import Kong, KongError
 
 
-TESTS = ('test', 'foo')
+TESTS = ('test', 'foo', 'pippo')
 
 
 @pytest.fixture(scope='session')
