@@ -29,6 +29,7 @@ class PluginMixin:
         return result
 
     async def preprocess_parameters(self, params):
+        await anonymous(self.cli, params)
         preprocessor = PLUGIN_PREPROCESSORS.get(params.get('name'))
         if preprocessor:
             params = await preprocessor(self.cli, params)
@@ -108,6 +109,13 @@ async def consumer_id_from_username(cli, params):
     if 'consumer_id' in params:
         c = await cli.consumers.get(params['consumer_id'])
         params['consumer_id'] = c['id']
+    return params
+
+
+async def anonymous(cli, params):
+    if 'config' in params and 'anonymous' in params['config']:
+        c = await cli.consumers.get(params['config']['anonymous'])
+        params['config']['anonymous'] = c['id']
     return params
 
 

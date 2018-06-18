@@ -13,6 +13,8 @@ services:
             config:
               origins: "*"
           - name: jwt
+            config:
+              anonymous: an-xxxx-test
           - name: request-termination
             consumer_id: an-xxxx-test
             config:
