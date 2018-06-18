@@ -1,0 +1,22 @@
+consumers:
+  - username: an-xxxx-test
+services:
+  - name: pippo
+    ensure: "present"
+    config:
+      host: "foo.local"
+    routes:
+      - paths: "/"
+        hosts: "api.foo.com"
+        plugins:
+          - name: cors
+            config:
+              origins: "*"
+          - name: jwt
+            config:
+              anonymous: an-xxxx-test
+          - name: request-termination
+            consumer_id: an-xxxx-test
+            config:
+              status_code: 403
+              message: requires authentication
