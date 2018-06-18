@@ -6,6 +6,7 @@ from kong.client import Kong, KongError
 
 
 TESTS = ('test', 'foo', 'pippo')
+CONSUMERS = ('an-xxxx-test',)
 
 
 @pytest.fixture(scope='session')
@@ -28,6 +29,12 @@ async def cleanup(cli):
     for name in TESTS:
         try:
             await cli.services.remove(name)
+        except KongError as exc:
+            if not exc.status == 404:
+                raise
+    for consumer in CONSUMERS:
+        try:
+            await cli.consumers.delete(name)
         except KongError as exc:
             if not exc.status == 404:
                 raise

@@ -1,3 +1,5 @@
+consumers:
+  - username: an-xxxx-test
 services:
   - name: pippo
     ensure: "present"
@@ -11,3 +13,8 @@ services:
             config:
               origins: "*"
           - name: jwt
+          - name: request-termination
+            consumer_id: an-xxxx-test
+            config:
+              status_code: 403
+              message: requires authentication

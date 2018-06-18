@@ -9,11 +9,8 @@ class Services(CrudComponent):
         return Service(self, data)
 
     async def remove(self, id):
-        print('getting %s' % id)
         s = await self.get(id)
-        print('removing %s routes' % id)
         await s.routes.delete_all()
-        print('removing %s' % id)
         await self.delete(id)
 
     async def apply_json(self, data):

@@ -1,7 +1,10 @@
 from .components import CrudComponent, ServiceEntity, KongError, KongEntity
 
 
-class PluginJsonApply:
+class PluginMixin:
+
+    def wrap(self, data):
+        return Plugin.factory(self.cli, data)
 
     async def apply_json(self, data):
         if not isinstance(data, list):
@@ -10,26 +13,33 @@ class PluginJsonApply:
         plugins = dict(((p['name'], p) for p in plugins))
         result = []
         for entry in data:
-            name = entry.get('name')
+            name = entry.pop('name', None)
             if not name:
                 raise KongError('Plugin name not specified')
             if name in plugins:
                 plugin = plugins.pop(name)
-                config = entry.get('config') or {}
-                plugin = await self.update(plugin['id'], config=config)
+                plugin = await self.update(
+                    plugin['id'], name=name, **entry)
             else:
-                plugin = await self.create(**entry)
+                plugin = await self.create(name=name, **entry)
 
             result.append(plugin.data)
         for entry in plugins.values():
             await self.delete(entry['id'])
         return result
 
+    async def preprocess_parameters(self, params):
+        preprocessor = PLUGIN_PREPROCESSORS.get(params.get('name'))
+        if preprocessor:
+            params = await preprocessor(self.cli, params)
+        return params
 
-class Plugins(PluginJsonApply, CrudComponent):
+    async def update(self, id, **params):
+        params = await self.preprocess_parameters(params)
+        return await super().update(id, **params)
 
-    def wrap(self, data):
-        return Plugin.factory(self.cli, data)
+
+class Plugins(PluginMixin, CrudComponent):
 
     async def get_for_service(self, plugin_name, service_id):
         plugins = await self.get_list(name=plugin_name, service_id=service_id)
@@ -38,32 +48,32 @@ class Plugins(PluginJsonApply, CrudComponent):
         return plugins[0]
 
 
-class ServicePlugins(PluginJsonApply, ServiceEntity):
+class ServicePlugins(PluginMixin, ServiceEntity):
 
-    def wrap(self, data):
-        return Plugin.factory(self.cli, data)
-
-    def create(self, skip_error=None, **params):
+    async def create(self, skip_error=None, **params):
         params['service_id'] = self.root.id
-        return self.execute(self.url, 'post', json=params,
-                            wrap=self.wrap, skip_error=skip_error)
+        params = await self.preprocess_parameters(params)
+        return await self.execute(
+            self.url, 'post', json=params,
+            wrap=self.wrap, skip_error=skip_error
+        )
 
 
-class RoutePlugins(PluginJsonApply, CrudComponent):
+class RoutePlugins(PluginMixin, CrudComponent):
     """Plugins associated with a Route
     """
-    def wrap(self, data):
-        return Plugin.factory(self.cli, data)
-
     def get_list(self, **params):
         url = '%s/%s' % (self.cli.url, self.name)
         params['route_id'] = self.root.id
         return self.execute(url, params=params, wrap=self.wrap_list)
 
-    def create(self, skip_error=None, **params):
+    async def create(self, skip_error=None, **params):
         params['route_id'] = self.root.id
-        return self.execute(self.url, 'post', json=params,
-                            wrap=self.wrap, skip_error=skip_error)
+        params = await self.preprocess_parameters(params)
+        return await self.execute(
+            self.url, 'post', json=params,
+            wrap=self.wrap, skip_error=skip_error
+        )
 
 
 class Plugin(KongEntity):
@@ -92,3 +102,15 @@ class JWTPlugin(Plugin):
         if isinstance(consumer, dict):
             consumer = self.root.consumers.wrap(consumer)
         return self.execute('%s/jwt/%s' % (consumer.url, jwt), method='DELETE')
+
+
+async def consumer_id_from_username(cli, params):
+    if 'consumer_id' in params:
+        c = await cli.consumers.get(params['consumer_id'])
+        params['consumer_id'] = c['id']
+    return params
+
+
+PLUGIN_PREPROCESSORS = {
+    'request-termination': consumer_id_from_username
+}
