@@ -6,6 +6,14 @@ class PluginMixin:
     def wrap(self, data):
         return Plugin.factory(self.cli, data)
 
+    @property
+    def url(self) -> str:
+        return '%s/%s' % (self.cli.url, self.name)
+
+    def get_list(self, **params):
+        url = '%s/%s' % (self.root.url, self.name)
+        return self.execute(url, params=params, wrap=self.wrap_list)
+
     async def apply_json(self, data):
         if not isinstance(data, list):
             data = [data]
@@ -19,7 +27,7 @@ class PluginMixin:
             if name in plugins:
                 plugin = plugins.pop(name)
                 plugin = await self.update(
-                    plugin['id'], name=name, **entry)
+                    plugin.id, name=name, **entry)
             else:
                 plugin = await self.create(name=name, **entry)
 
@@ -63,11 +71,6 @@ class ServicePlugins(PluginMixin, ServiceEntity):
 class RoutePlugins(PluginMixin, CrudComponent):
     """Plugins associated with a Route
     """
-    def get_list(self, **params):
-        url = '%s/%s' % (self.cli.url, self.name)
-        params['route_id'] = self.root.id
-        return self.execute(url, params=params, wrap=self.wrap_list)
-
     async def create(self, skip_error=None, **params):
         params['route_id'] = self.root.id
         params = await self.preprocess_parameters(params)

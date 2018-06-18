@@ -90,3 +90,5 @@ async def test_json_plugins(cli):
 async def test_json_route_plugins(cli):
     with open(os.path.join(PATH, 'test6.yaml')) as fp:
         await cli.apply_json(yaml.load(fp))
+    with open(os.path.join(PATH, 'test6.yaml')) as fp:
+        await cli.apply_json(yaml.load(fp))
