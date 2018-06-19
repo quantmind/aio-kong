@@ -22,12 +22,14 @@ async def test_create_service(cli):
 
 
 async def test_update_service(cli):
+    await cli.services.create(name='test', host='example.upstream', port=8080)
     c = await cli.services.update('test', host='test.upstream')
     assert c.name == 'test'
     assert c.host == 'test.upstream'
 
 
 async def test_routes(cli):
+    await cli.services.create(name='test', host='example.upstream', port=8080)
     c = await cli.services.get('test')
     routes = await c.routes.get_list()
     assert len(routes) == 0

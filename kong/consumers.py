@@ -23,7 +23,6 @@ class Consumers(CrudComponent):
                     consumer = await self.update(username, **entry)
                 else:
                     consumer = consumers[username]
-                consumers.pop(username)
             else:
                 consumer = await self.create(username=username, **entry)
 
@@ -37,3 +36,14 @@ class Consumer(KongEntity):
     @property
     def username(self):
         return self.data.get('username')
+
+    def create_jwt(self):
+        url = f'{self.url}/jwt'
+        return self.cli.execute(
+            url, 'POST',
+            headers={'Content-Type': 'application/x-www-form-urlencoded'}
+        )
+
+    def delete_jwt(self, id):
+        url = f'{self.url}/jwt/{id}'
+        return self.cli.execute(url, 'DELETE')

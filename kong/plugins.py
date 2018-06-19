@@ -4,7 +4,7 @@ from .components import CrudComponent, ServiceEntity, KongError, KongEntity
 class PluginMixin:
 
     def wrap(self, data):
-        return Plugin.factory(self.cli, data)
+        return Plugin(self.cli, data)
 
     @property
     def url(self) -> str:
@@ -81,31 +81,7 @@ class RoutePlugins(PluginMixin, CrudComponent):
 
 
 class Plugin(KongEntity):
-
-    @classmethod
-    def factory(cls, root, data):
-        if data['name'] == 'jwt':
-            return JWTPlugin(root, data)
-        return Plugin(root, data)
-
-
-class JWTPlugin(Plugin):
-
-    def create_consumer_jwt(self, consumer, **params):
-        return self.execute(
-            '%s/jwt' % consumer.url, method='POST', json=params
-        )
-
-    def get_consumer_by_jwt(self, jwt):
-        return self.execute(
-            '%s/jwts/%s/consumer' % (self.root.url, jwt), method='GET',
-            wrap=self.root.consumers.wrap
-        )
-
-    def remove_consumer_jwt(self, consumer, jwt):
-        if isinstance(consumer, dict):
-            consumer = self.root.consumers.wrap(consumer)
-        return self.execute('%s/jwt/%s' % (consumer.url, jwt), method='DELETE')
+    pass
 
 
 async def consumer_id_from_username(cli, params):
