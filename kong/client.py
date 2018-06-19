@@ -58,10 +58,14 @@ class Kong:
             return await callback(response)
         if response.status == 204:
             return True
-        data = await response.json()
         if response.status >= 400:
+            try:
+                data = await response.json()
+            except Exception:
+                data = await response.text()
             raise KongResponseError(response, json.dumps(data, indent=4))
         response.raise_for_status()
+        data = await response.json()
         return wrap(data) if wrap else data
 
     async def apply_json(self, config):
