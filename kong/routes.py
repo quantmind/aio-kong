@@ -26,7 +26,7 @@ class ServiceRoutes(ServiceEntity):
                 if route:
                     await self.delete(route.id)
                 continue
-            plugins = d.pop('plugins', None)
+            plugins = d.pop('plugins', [])
             as_list('hosts', d)
             as_list('paths', d)
             as_list('methods', d)
@@ -34,8 +34,7 @@ class ServiceRoutes(ServiceEntity):
                 route = await self.create(**d)
             else:
                 route = await self.update(route.id, **d)
-            if plugins:
-                route.data['plugins'] = await route.plugins.apply_json(plugins)
+            route.data['plugins'] = await route.plugins.apply_json(plugins)
             result.append(route.data)
         return result
 
