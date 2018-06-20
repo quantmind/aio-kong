@@ -94,3 +94,20 @@ async def test_json_route_plugins(cli):
         await cli.apply_json(yaml.load(fp))
     with open(os.path.join(PATH, 'test6.yaml')) as fp:
         await cli.apply_json(yaml.load(fp))
+    srv = await cli.services.get('pippo')
+    plugins = await srv.plugins.get_list()
+    assert len(plugins) == 1
+    routes = await srv.routes.get_list()
+    assert len(routes) == 1
+    plugins = await routes[0].plugins.get_list()
+    assert len(plugins) == 3
+
+    with open(os.path.join(PATH, 'test61.yaml')) as fp:
+        await cli.apply_json(yaml.load(fp))
+    srv = await cli.services.get('pippo')
+    plugins = await srv.plugins.get_list()
+    assert len(plugins) == 0
+    routes = await srv.routes.get_list()
+    assert len(routes) == 1
+    plugins = await routes[0].plugins.get_list()
+    assert len(plugins) == 1

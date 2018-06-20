@@ -22,26 +22,22 @@ class Services(CrudComponent):
         for entry in data:
             if not isinstance(entry, dict):
                 raise KongError('dictionary required')
-            name = entry.get('name')
+            entry.pop('ensure', None)
+            name = entry.pop('name', None)
+            routes = entry.pop('routes', [])
+            plugins = entry.pop('plugins', [])
             if not name:
                 raise KongError('Service name is required')
-            config = entry.get('config')
-            if not isinstance(config, dict):
-                raise KongError('config dictionary for %s is required' % name)
-
+            # backward compatible with config entry
+            config = entry.pop('config', None)
+            if isinstance(config, dict):
+                entry.update(config)
             if await self.has(name):
-                srv = await self.update(name, **config)
+                srv = await self.update(name, **entry)
             else:
-                srv = await self.create(name=name, **config)
-
-            routes = entry.get('routes')
-            if routes:
-                srv.data['routes'] = await srv.routes.apply_json(routes)
-
-            plugins = entry.get('plugins')
-            if plugins:
-                srv.data['plugins'] = await srv.plugins.apply_json(plugins)
-
+                srv = await self.create(name=name, **entry)
+            srv.data['routes'] = await srv.routes.apply_json(routes)
+            srv.data['plugins'] = await srv.plugins.apply_json(plugins)
             result.append(srv.data)
         return result
 

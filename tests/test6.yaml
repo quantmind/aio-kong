@@ -2,9 +2,11 @@ consumers:
   - username: an-xxxx-test
 services:
   - name: pippo
-    ensure: "present"
-    config:
-      host: "foo.local"
+    host: "foo.local"
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 60
     routes:
       - paths: "/"
         hosts: "api.foo.com"
