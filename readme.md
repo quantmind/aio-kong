@@ -1,5 +1,7 @@
 # Async Python Client for Kong
 
+[![PyPI version](https://badge.fury.io/py/aio-kong.svg)](https://badge.fury.io/py/aio-kong)
+
 [![CircleCI](https://circleci.com/gh/lendingblock/aio-kong.svg?style=svg)](https://circleci.com/gh/lendingblock/aio-kong)
 
 [![codecov](https://codecov.io/gh/lendingblock/aio-kong/branch/master/graph/badge.svg)](https://codecov.io/gh/lendingblock/aio-kong)

@@ -1,8 +1,6 @@
 services:
   - name: foo
-    ensure: "present"
-    config:
-      host: "foo.local"
+    host: "foo.local"
     routes:
       - paths: "/"
         hosts: "api.foo.com"

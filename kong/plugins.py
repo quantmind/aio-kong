@@ -49,12 +49,7 @@ class PluginMixin:
 
 
 class Plugins(PluginMixin, CrudComponent):
-
-    async def get_for_service(self, plugin_name, service_id):
-        plugins = await self.get_list(name=plugin_name, service_id=service_id)
-        if not plugins:
-            raise KongError('Plugin %s not found' % plugin_name)
-        return plugins[0]
+    pass
 
 
 class ServicePlugins(PluginMixin, ServiceEntity):
