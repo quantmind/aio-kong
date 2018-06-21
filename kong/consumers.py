@@ -9,8 +9,6 @@ class Consumers(CrudComponent):
     async def apply_json(self, data):
         if not isinstance(data, list):
             data = [data]
-        consumers = await self.get_list()
-        consumers = dict(((c.username, c) for c in consumers if c.username))
         result = []
         for entry in data:
             if not isinstance(entry, dict):
@@ -18,13 +16,16 @@ class Consumers(CrudComponent):
             username = entry.pop('username', None)
             if not username:
                 raise KongError('Consumer username is required')
-            if username in consumers:
+            try:
+                consumer = await self.get(username)
+            except KongError as exc:
+                if exc.status == 404:
+                    consumer = await self.create(username=username, **entry)
+                else:
+                    raise
+            else:
                 if entry:
                     consumer = await self.update(username, **entry)
-                else:
-                    consumer = consumers[username]
-            else:
-                consumer = await self.create(username=username, **entry)
 
             result.append(consumer.data)
 
