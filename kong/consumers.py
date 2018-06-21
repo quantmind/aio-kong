@@ -47,3 +47,14 @@ class Consumer(KongEntity):
     def delete_jwt(self, id):
         url = f'{self.url}/jwt/{id}'
         return self.cli.execute(url, 'DELETE')
+
+    def create_key_auth(self):
+        url = f'{self.url}/key-auth'
+        return self.cli.execute(
+            url, 'POST',
+            headers={'Content-Type': 'application/x-www-form-urlencoded'}
+        )
+
+    def delete_key_auth(self, id):
+        url = f'{self.url}/key-auth/{id}'
+        return self.cli.execute(url, 'DELETE')

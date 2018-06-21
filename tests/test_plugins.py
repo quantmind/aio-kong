@@ -21,3 +21,16 @@ async def test_jwt_delete(cli, consumer):
     await consumer.delete_jwt(jwt['id'])
     with pytest.raises(KongError):
         await consumer.delete_jwt(jwt['id'])
+
+
+async def test_key_auth_create(cli, consumer):
+    auth = await consumer.create_key_auth()
+    assert auth['consumer_id'] == consumer.id
+
+
+async def test_key_auth_delete(cli, consumer):
+    auth = await consumer.create_key_auth()
+    assert auth['consumer_id'] == consumer.id
+    await consumer.delete_key_auth(auth['id'])
+    with pytest.raises(KongError):
+        await consumer.delete_key_auth(auth['id'])
