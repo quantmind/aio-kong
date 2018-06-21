@@ -111,3 +111,57 @@ async def test_json_route_plugins(cli):
     assert len(routes) == 1
     plugins = await routes[0].plugins.get_list()
     assert len(plugins) == 1
+
+
+async def test_snis(cli):
+    c1 = await cli.certificates.create(
+        cert='-----BEGIN CERTIFICATE-----...',
+        key='-----BEGIN RSA PRIVATE KEY-----...'
+    )
+    c2 = await cli.certificates.create(
+        cert='-----BEGIN CERTIFICATE-----...',
+        key='-----BEGIN RSA PRIVATE KEY-----...'
+    )
+    config = {
+        'snis': [
+            {
+                'name': 'a1.example.com',
+                'ssl_certificate_id': c1['id'],
+            },
+            {
+                'name': 'a2.example.com',
+                'ssl_certificate_id': c2['id'],
+            },
+        ]
+    }
+    resp = await cli.apply_json(config)
+    snis = resp['snis']
+
+    # CREATE
+    for sni in snis:
+        sni.pop('created_at')
+    assert snis == config['snis']
+
+    # UPDATE
+    config['snis'][0]['ssl_certificate_id'] = c2['id']
+    config['snis'][1]['ssl_certificate_id'] = c1['id']
+    resp = await cli.apply_json(config)
+    snis = resp['snis']
+
+    for sni in snis:
+        sni.pop('created_at')
+    assert snis == config['snis']
+
+    # GET
+
+    snis = await cli.snis.get_list()
+    assert len(snis) == 2
+    snis = {
+        sni.data['name']: sni.data['ssl_certificate_id']
+        for sni in snis
+    }
+    expected = {
+        sni['name']: sni['ssl_certificate_id']
+        for sni in config['snis']
+    }
+    assert snis == expected
