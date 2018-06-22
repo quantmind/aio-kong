@@ -35,8 +35,8 @@ class Consumers(CrudComponent):
                 else:
                     current_groups.pop(group)
 
-            # for acl in current_groups.values():
-            #     await self.cli.acls.delete(acl['id'])
+            for acl in current_groups.values():
+                await consumer.delete_acls(acl['id'])
 
             result.append(consumer.data)
 
@@ -74,6 +74,10 @@ class Consumer(KongEntity):
     def create_acls(self, group):
         url = f'{self.url}/acls'
         return self.cli.execute(url, 'POST', json=dict(group=group))
+
+    def delete_acls(self, id):
+        url = f'{self.url}/acls/{id}'
+        return self.cli.execute(url, 'DELETE')
 
     def acls(self):
         return self.cli.acls.get_list(consumer_id=self.id)
