@@ -1,5 +1,8 @@
 consumers:
   - username: an-xxxx-test
+    groups:
+      - boom
+      - bam
 services:
   - name: pippo
     host: "foo.local"

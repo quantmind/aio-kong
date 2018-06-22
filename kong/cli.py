@@ -6,16 +6,26 @@ import click
 
 import yaml as _yaml
 
-from kong.client import Kong, KongError
+from . import __version__
+from .client import Kong, KongError
 
 
 @click.command()
+@click.option(
+    '--version',
+    is_flag=True,
+    default=False,
+    help='Display version and exit'
+)
 @click.option(
     '--yaml', type=click.File('r'),
     help='Yaml configuration to upload'
 )
 @click.pass_context
-def kong(ctx, yaml):
+def kong(ctx, version, yaml):
+    if version:
+        click.echo(__version__)
+        ctx.exit()
     return asyncio.get_event_loop().run_until_complete(_run(ctx, yaml))
 
 

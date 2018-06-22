@@ -1,5 +1,6 @@
 from click.testing import CliRunner
 
+from kong import __version__
 from kong.cli import kong
 
 
@@ -8,6 +9,13 @@ def test_empty():
     result = runner.invoke(kong, [])
     assert result.exit_code == 0
     assert result.output.startswith('Usage: kong [OPTIONS]')
+
+
+def test_version():
+    runner = CliRunner()
+    result = runner.invoke(kong, ['--version'])
+    assert result.exit_code == 0
+    assert result.output.rstrip() == __version__
 
 
 def test_plugins():

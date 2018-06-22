@@ -1,3 +1,4 @@
+import copy
 import os
 import json
 
@@ -8,6 +9,8 @@ from .services import Services
 from .plugins import Plugins
 from .consumers import Consumers
 from .certificates import Certificates
+from .acls import Acls
+from .snis import Snis
 
 
 __all__ = [
@@ -27,6 +30,8 @@ class Kong:
         self.plugins = Plugins(self)
         self.consumers = Consumers(self)
         self.certificates = Certificates(self)
+        self.acls = Acls(self)
+        self.snis = Snis(self)
 
     def __repr__(self) -> str:
         return self.url
@@ -69,6 +74,7 @@ class Kong:
         return wrap(data) if wrap else data
 
     async def apply_json(self, config):
+        config = copy.deepcopy(config)
         if not isinstance(config, dict):
             raise KongError('Expected a dict got %s' % type(config).__name__)
         result = {}
