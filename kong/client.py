@@ -9,6 +9,7 @@ from .services import Services
 from .plugins import Plugins
 from .consumers import Consumers
 from .certificates import Certificates
+from .acls import Acls
 from .snis import Snis
 
 
@@ -29,6 +30,7 @@ class Kong:
         self.plugins = Plugins(self)
         self.consumers = Consumers(self)
         self.certificates = Certificates(self)
+        self.acls = Acls(self)
         self.snis = Snis(self)
 
     def __repr__(self) -> str:

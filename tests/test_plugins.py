@@ -34,3 +34,12 @@ async def test_key_auth_delete(cli, consumer):
     await consumer.delete_key_auth(auth['id'])
     with pytest.raises(KongError):
         await consumer.delete_key_auth(auth['id'])
+
+
+async def test_group(cli, consumer):
+    r = await consumer.create_acls('a')
+    assert r['consumer_id'] == consumer.id
+    assert r['group'] == 'a'
+    r = await consumer.create_acls('b')
+    assert r['consumer_id'] == consumer.id
+    assert r['group'] == 'b'
