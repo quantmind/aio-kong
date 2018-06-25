@@ -171,3 +171,15 @@ async def test_snis(cli):
         for sni in config['snis']
     }
     assert snis == expected
+
+
+async def test_ensure_remove(cli):
+    with open(os.path.join(PATH, 'test6.yaml')) as fp:
+        await cli.apply_json(yaml.load(fp))
+    assert await cli.services.has('pippo') is True
+    with open(os.path.join(PATH, 'test7.yaml')) as fp:
+        await cli.apply_json(yaml.load(fp))
+    assert await cli.services.has('pippo') is False
+    with open(os.path.join(PATH, 'test7.yaml')) as fp:
+        await cli.apply_json(yaml.load(fp))
+    assert await cli.services.has('pippo') is False

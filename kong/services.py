@@ -3,6 +3,9 @@ from .routes import ServiceRoutes
 from .plugins import ServicePlugins
 
 
+REMOVE = frozenset(('absent', 'remove'))
+
+
 class Services(CrudComponent):
     """Kong API component"""
     def wrap(self, data):
@@ -22,12 +25,16 @@ class Services(CrudComponent):
         for entry in data:
             if not isinstance(entry, dict):
                 raise KongError('dictionary required')
-            entry.pop('ensure', None)
+            ensure = entry.pop('ensure', None)
             name = entry.pop('name', None)
             routes = entry.pop('routes', [])
             plugins = entry.pop('plugins', [])
             if not name:
                 raise KongError('Service name is required')
+            if ensure in REMOVE:
+                if await self.has(name):
+                    await self.remove(name)
+                continue
             # backward compatible with config entry
             config = entry.pop('config', None)
             if isinstance(config, dict):
