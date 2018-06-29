@@ -1,6 +1,6 @@
 services:
   - name: foo
-    host: "foo.local"
+    host: "localhost"
     routes:
       - paths: "/"
         hosts: "api.foo.com"
