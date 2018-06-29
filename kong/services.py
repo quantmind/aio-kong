@@ -1,9 +1,11 @@
 from .components import CrudComponent, KongEntity, KongError
 from .routes import ServiceRoutes
 from .plugins import ServicePlugins
+from .utils import local_ip
 
 
 REMOVE = frozenset(('absent', 'remove'))
+LOCAL_HOST = frozenset(('localhost', '127.0.0.1'))
 
 
 class Services(CrudComponent):
@@ -29,6 +31,9 @@ class Services(CrudComponent):
             name = entry.pop('name', None)
             routes = entry.pop('routes', [])
             plugins = entry.pop('plugins', [])
+            host = entry.pop('host', None)
+            if host in LOCAL_HOST:
+                host = local_ip()
             if not name:
                 raise KongError('Service name is required')
             if ensure in REMOVE:
@@ -40,9 +45,9 @@ class Services(CrudComponent):
             if isinstance(config, dict):
                 entry.update(config)
             if await self.has(name):
-                srv = await self.update(name, **entry)
+                srv = await self.update(name, host=host, **entry)
             else:
-                srv = await self.create(name=name, **entry)
+                srv = await self.create(name=name, host=host, **entry)
             srv.data['routes'] = await srv.routes.apply_json(routes)
             srv.data['plugins'] = await srv.plugins.apply_json(plugins)
             result.append(srv.data)
