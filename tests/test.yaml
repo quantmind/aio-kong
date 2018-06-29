@@ -1,11 +1,11 @@
 services:
   - name: foo
-    host: "localhost"
+    host: localhost
     routes:
       - paths: "/"
-        hosts: "api.foo.com"
+        hosts: api.foo.com
       - paths: "/spec"
-        hosts: "doc.foo.com"
+        hosts: doc.foo.com
     plugins:
       - name: cors
         config:
