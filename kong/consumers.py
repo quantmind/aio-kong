@@ -60,6 +60,11 @@ class Consumer(KongEntity):
         url = f'{self.url}/jwt/{id}'
         return self.cli.execute(url, 'DELETE')
 
+    async def key_auths(self):
+        url = f'{self.url}/key-auth'
+        result = await self.cli.execute(url, 'GET')
+        return result['data']
+
     def create_key_auth(self):
         url = f'{self.url}/key-auth'
         return self.cli.execute(
