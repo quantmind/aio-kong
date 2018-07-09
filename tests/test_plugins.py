@@ -10,9 +10,17 @@ async def consumer(cli, service):
     return consumer
 
 
+async def test_consumer(cli, consumer):
+    assert consumer.username == 'test-xx'
+
+
 async def test_jwt_create(cli, consumer):
     jwt = await consumer.create_jwt()
     assert jwt['consumer_id'] == consumer.id
+    data = await consumer.jwts()
+    assert data
+    data = [d for d in data if d['id'] == jwt['id']]
+    assert data
 
 
 async def test_jwt_delete(cli, consumer):
