@@ -49,6 +49,11 @@ class Consumer(KongEntity):
     def username(self):
         return self.data.get('username')
 
+    async def jwts(self):
+        url = f'{self.url}/jwt'
+        result = await self.cli.execute(url, 'GET')
+        return result['data']
+
     def create_jwt(self):
         url = f'{self.url}/jwt'
         return self.cli.execute(
