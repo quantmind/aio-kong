@@ -183,3 +183,12 @@ async def test_ensure_remove(cli):
     with open(os.path.join(PATH, 'test7.yaml')) as fp:
         await cli.apply_json(yaml.load(fp))
     assert await cli.services.has('pippo') is False
+
+
+async def test_pagination(cli):
+    with open(os.path.join(PATH, 'test9.yaml')) as fp:
+        await cli.apply_json(yaml.load(fp))
+    consumers = []
+    async for consumer in cli.consumers.paginate():
+        consumers.append(consumer)
+    assert len(consumers) >= 2

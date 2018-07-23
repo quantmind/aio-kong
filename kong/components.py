@@ -49,6 +49,14 @@ class CrudComponent(Component):
     def get_list(self, **params):
         return self.execute(self.url, params=params, wrap=self.wrap_list)
 
+    async def paginate(self):
+        next_ = self.url
+        while next_:
+            data = await self.execute(next_)
+            next_ = data.get('next')
+            for d in data['data']:
+                yield self.wrap(d)
+
     def get(self, id):
         return self.execute('%s/%s' % (self.url, id), wrap=self.wrap)
 
@@ -105,6 +113,9 @@ class KongEntity:
 
     def __repr__(self):
         return repr(self.data)
+
+    def get(self, item, default=None):
+        return self.data.get(item, default)
 
     def execute(self, url, method=None, **params):
         return self.root.execute(url, method, **params)
