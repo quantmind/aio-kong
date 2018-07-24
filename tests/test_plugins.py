@@ -12,6 +12,7 @@ async def consumer(cli, service):
 
 async def test_consumer(cli, consumer):
     assert consumer.username == 'test-xx'
+    assert consumer.get('custom_id', '') == ''
 
 
 async def test_jwt_create(cli, consumer):
