@@ -46,8 +46,6 @@ class Kong:
             await self.session.close()
 
     async def __aenter__(self) -> object:
-        if not self.session:
-            self.session = aiohttp.ClientSession()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -56,6 +54,8 @@ class Kong:
     async def execute(self, url, method=None, headers=None,
                       callback=None, wrap=None, timeout=None, skip_error=None,
                       **kw):
+        if not self.session:
+            self.session = aiohttp.ClientSession()
         method = method or 'GET'
         headers = headers or {}
         headers['Accept'] = 'application/json, text/*; q=0.5'
