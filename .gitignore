@@ -17,5 +17,10 @@ dist
 .env
 *.log
 
+# ides
+.vscode/.ropeproject
+.idea
+*.swp
+
 # Mac
 .DS_Store

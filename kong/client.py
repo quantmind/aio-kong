@@ -25,7 +25,7 @@ class Kong:
 
     def __init__(self, url: str=None, session: object=None) -> None:
         self.url = url or self.url
-        self.session = session or aiohttp.ClientSession()
+        self.session = session
         self.services = Services(self)
         self.plugins = Plugins(self)
         self.consumers = Consumers(self)
@@ -42,7 +42,8 @@ class Kong:
         return self
 
     async def close(self) -> None:
-        await self.session.close()
+        if self.session:
+            await self.session.close()
 
     async def __aenter__(self) -> object:
         return self
@@ -53,6 +54,8 @@ class Kong:
     async def execute(self, url, method=None, headers=None,
                       callback=None, wrap=None, timeout=None, skip_error=None,
                       **kw):
+        if not self.session:
+            self.session = aiohttp.ClientSession()
         method = method or 'GET'
         headers = headers or {}
         headers['Accept'] = 'application/json, text/*; q=0.5'
