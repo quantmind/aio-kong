@@ -42,7 +42,8 @@ class Kong:
         return self
 
     async def close(self) -> None:
-        await self.session.close()
+        if self.session:
+            await self.session.close()
 
     async def __aenter__(self) -> object:
         if not self.session:
