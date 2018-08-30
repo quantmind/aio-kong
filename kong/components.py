@@ -1,3 +1,4 @@
+from .utils import as_params
 
 
 class KongError(Exception):
@@ -37,8 +38,8 @@ class Component:
     def url(self) -> str:
         return '%s/%s' % (self.root.url, self.name)
 
-    def execute(self, url: str, method: str=None, **params) -> object:
-        return self.root.execute(url, method, **params)
+    def execute(self, url: str, method: str=None, **kwargs) -> object:
+        return self.root.execute(url, method, **kwargs)
 
     def apply_json(self, data):
         raise NotImplementedError
@@ -47,10 +48,13 @@ class Component:
 class CrudComponent(Component):
 
     def get_list(self, **params):
-        return self.execute(self.url, params=params, wrap=self.wrap_list)
+        return self.execute(
+            self.url, params=as_params(**params), wrap=self.wrap_list
+        )
 
     async def paginate(self, **params):
         next_ = self.url
+        params = as_params(**params)
         while next_:
             data = await self.execute(next_, params=params)
             next_ = data.get('next')

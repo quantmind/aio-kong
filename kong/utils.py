@@ -1,4 +1,5 @@
 import socket
+from multidict import MultiDict
 
 
 def as_list(key, data):
@@ -18,3 +19,9 @@ def local_ip():
         return s.getsockname()[0]
     finally:
         s.close()
+
+
+def as_params(*, params=None, **kwargs):
+    params = MultiDict(params if params is not None else {})
+    params.update(kwargs)
+    return params
