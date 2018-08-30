@@ -89,5 +89,6 @@ class Consumer(KongEntity):
         url = f'{self.url}/acls/{id}'
         return self.cli.execute(url, 'DELETE')
 
-    def acls(self):
-        return self.cli.acls.get_list(consumer_id=self.id)
+    def acls(self, **params):
+        params['consumer_id'] = self.id
+        return self.cli.acls.get_list(**params)

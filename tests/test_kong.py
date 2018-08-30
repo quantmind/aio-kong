@@ -192,3 +192,18 @@ async def test_pagination(cli):
     async for consumer in cli.consumers.paginate():
         consumers.append(consumer)
     assert len(consumers) >= 2
+
+
+async def test_paginate_params(cli, consumer):
+    await consumer.create_acls('test1')
+    await consumer.create_acls('test2')
+    consumer2 = await cli.consumers.create(username='an-xxxx-test')
+    consumer3 = await cli.consumers.create(username='test-yy')
+    await consumer2.create_acls('test2')
+    await consumer3.create_acls('test3')
+    users = [u async for u in cli.acls.paginate(group='test1', size=1)]
+    assert len(users) == 1
+    users = [u async for u in cli.acls.paginate(group='test2', size=1)]
+    assert len(users) == 2
+    acls = await consumer.acls(group='test2')
+    assert len(acls) == 1
