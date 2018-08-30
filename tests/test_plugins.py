@@ -3,13 +3,6 @@ import pytest
 from kong.client import KongError
 
 
-@pytest.fixture()
-async def consumer(cli, service):
-    await service.plugins.create(name='jwt')
-    consumer = await cli.consumers.create(username='test-xx')
-    return consumer
-
-
 async def test_consumer(cli, consumer):
     assert consumer.username == 'test-xx'
     assert consumer.get('custom_id', '') == ''

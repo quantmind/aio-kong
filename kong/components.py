@@ -49,10 +49,10 @@ class CrudComponent(Component):
     def get_list(self, **params):
         return self.execute(self.url, params=params, wrap=self.wrap_list)
 
-    async def paginate(self):
+    async def paginate(self, **params):
         next_ = self.url
         while next_:
-            data = await self.execute(next_)
+            data = await self.execute(next_, params=params)
             next_ = data.get('next')
             for d in data['data']:
                 yield self.wrap(d)
