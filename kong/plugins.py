@@ -14,10 +14,12 @@ class PluginMixin:
         url = '%s/%s' % (self.root.url, self.name)
         return self.execute(url, params=params, wrap=self.wrap_list)
 
-    async def apply_json(self, data):
+    async def apply_json(self, data, **kwargs):
         if not isinstance(data, list):
             data = [data]
-        plugins = await self.get_list()
+        plugins = await self.get_list(**kwargs)
+        if not kwargs:
+            plugins = [p for p in plugins if self.root_plugin(p)]
         plugins = dict(((p['name'], p) for p in plugins))
         result = []
         for entry in data:
@@ -35,6 +37,9 @@ class PluginMixin:
         for entry in plugins.values():
             await self.delete(entry['id'])
         return result
+
+    def root_plugin(self, plugin):
+        return 'service_id' not in plugin and 'route_id' not in plugin
 
     async def preprocess_parameters(self, params):
         await anonymous(self.cli, params)
@@ -62,6 +67,10 @@ class ServicePlugins(PluginMixin, ServiceEntity):
             wrap=self.wrap, skip_error=skip_error
         )
 
+    async def apply_json(self, data, **kwargs):
+        kwargs['service_id'] = self.root.id
+        return await super().apply_json(data, **kwargs)
+
 
 class RoutePlugins(PluginMixin, CrudComponent):
     """Plugins associated with a Route
@@ -73,6 +82,10 @@ class RoutePlugins(PluginMixin, CrudComponent):
             self.url, 'post', json=params,
             wrap=self.wrap, skip_error=skip_error
         )
+
+    async def apply_json(self, data, **kwargs):
+        kwargs['route_id'] = self.root.id
+        return await super().apply_json(data, **kwargs)
 
 
 class Plugin(KongEntity):
