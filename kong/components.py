@@ -103,6 +103,9 @@ class KongEntity:
     def __getitem__(self, item):
         return self.data[item]
 
+    def __contains__(self, item):
+        return item in self.data
+
     @property
     def cli(self):
         return self.root.cli
