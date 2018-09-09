@@ -17,6 +17,13 @@ async def test_jwt_create(cli, consumer):
     assert data
 
 
+@pytest.mark.parametrize('keyname', ('key', 'id'))
+async def test_consumer_from_jwt(cli, consumer, keyname):
+    jwt = await consumer.create_jwt()
+    consumer_ = await cli.jwts.get_consumer(jwt[keyname])
+    assert consumer_['id'] == jwt['consumer_id']
+
+
 async def test_jwt_delete(cli, consumer):
     jwt = await consumer.create_jwt()
     assert jwt['consumer_id'] == consumer.id

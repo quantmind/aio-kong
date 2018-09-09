@@ -11,6 +11,7 @@ from .consumers import Consumers
 from .certificates import Certificates
 from .acls import Acls
 from .snis import Snis
+from .jwts import Jwts
 
 
 __all__ = [
@@ -32,6 +33,7 @@ class Kong:
         self.certificates = Certificates(self)
         self.acls = Acls(self)
         self.snis = Snis(self)
+        self.jwts = Jwts(self)
 
     def __repr__(self) -> str:
         return self.url
