@@ -61,6 +61,10 @@ class Consumer(KongEntity):
             headers={'Content-Type': 'application/x-www-form-urlencoded'}
         )
 
+    def get_jwt(self, id):
+        url = f'{self.url}/jwt/{id}'
+        return self.cli.execute(url)
+
     def delete_jwt(self, id):
         url = f'{self.url}/jwt/{id}'
         return self.cli.execute(url, 'DELETE')

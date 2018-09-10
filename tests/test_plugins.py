@@ -15,6 +15,8 @@ async def test_jwt_create(cli, consumer):
     assert data
     data = [d for d in data if d['id'] == jwt['id']]
     assert data
+    jwt2 = await consumer.get_jwt(jwt['id'])
+    assert jwt == jwt2
 
 
 async def test_jwt_delete(cli, consumer):
