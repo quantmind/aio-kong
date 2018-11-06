@@ -21,6 +21,7 @@ jobs:
                         -e KONG_PG_DATABASE=postgres
                         -e "KONG_ADMIN_LISTEN=0.0.0.0:8001"
                         -p 8001:8001 -d kong:0.13
+      - run: cd /opt/circleci/.pyenv/plugins/python-build/../.. && git pull && cd -
       - run: pyenv install 3.7.1 && pyenv global 3.7.1
       - run:
           name: install
