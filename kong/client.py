@@ -1,6 +1,7 @@
 import copy
 import os
 import json
+import typing
 
 import aiohttp
 
@@ -23,7 +24,7 @@ __all__ = [
 class Kong:
     url = os.environ.get('KONG_URL', 'http://127.0.0.1:8001')
 
-    def __init__(self, url: str=None, session: object=None) -> None:
+    def __init__(self, url: str = None, session: typing.Any = None) -> None:
         self.url = url or self.url
         self.session = session
         self.services = Services(self)

@@ -40,6 +40,12 @@ async def test_key_auth_delete(cli, consumer):
         await consumer.delete_key_auth(auth['id'])
 
 
+async def test_get_or_create_jwt(cli, consumer):
+    jwt1 = await consumer.get_or_create_jwt()
+    jwt2 = await consumer.get_or_create_jwt()
+    assert jwt1 == jwt2
+
+
 async def test_group(cli, consumer):
     r = await consumer.create_acls('a')
     assert r['consumer_id'] == consumer.id

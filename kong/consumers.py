@@ -61,6 +61,12 @@ class Consumer(KongEntity):
             headers={'Content-Type': 'application/x-www-form-urlencoded'}
         )
 
+    async def get_or_create_jwt(self):
+        url = f'{self.url}/jwt'
+        result = await self.cli.execute(url, 'GET')
+        secrets = result['data']
+        return secrets[0] if secrets else await self.create_jwt()
+
     def get_jwt(self, id):
         url = f'{self.url}/jwt/{id}'
         return self.cli.execute(url)
