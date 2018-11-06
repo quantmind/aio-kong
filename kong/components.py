@@ -38,7 +38,7 @@ class Component:
     def url(self) -> str:
         return '%s/%s' % (self.root.url, self.name)
 
-    def execute(self, url: str, method: str=None, **kwargs) -> object:
+    def execute(self, url: str, method: str = None, **kwargs) -> object:
         return self.root.execute(url, method, **kwargs)
 
     def apply_json(self, data):
