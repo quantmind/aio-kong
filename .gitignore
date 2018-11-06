@@ -16,6 +16,7 @@ dist
 # files
 .env
 *.log
+.python-version
 
 # ides
 .vscode/.ropeproject
