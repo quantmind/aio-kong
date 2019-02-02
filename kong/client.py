@@ -4,12 +4,11 @@ import typing
 
 import aiohttp
 
-from .components import KongError, KongResponseError
+from .components import KongError, KongResponseError, CrudComponent
 from .services import Services
 from .plugins import Plugins
 from .consumers import Consumers
 from .certificates import Certificates
-from .acls import Acls
 from .snis import Snis
 
 
@@ -32,7 +31,7 @@ class Kong:
         self.plugins = Plugins(self)
         self.consumers = Consumers(self)
         self.certificates = Certificates(self)
-        self.acls = Acls(self)
+        self.acls = CrudComponent(self, 'acls')
         self.snis = Snis(self)
 
     def __repr__(self) -> str:
@@ -91,3 +90,9 @@ class Kong:
                 raise KongError('Kong object %s not available' % name)
             result[name] = await o.apply_json(data)
         return result
+
+    async def delete_all(self):
+        await self.services.delete_all()
+        await self.consumers.delete_all()
+        await self.plugins.delete_all()
+        await self.certificates.delete_all()

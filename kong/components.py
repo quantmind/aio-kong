@@ -93,6 +93,10 @@ class CrudComponent:
     def url(self) -> str:
         return f'{self.cli.url}/{self.name}'
 
+    @property
+    def is_entity(self):
+        return isinstance(self.root, KongEntity)
+
     def execute(self, url: str, method: str = None, **kwargs) -> object:
         return self.root.execute(url, method, **kwargs)
 
@@ -106,7 +110,6 @@ class CrudComponent:
         while next_:
             if not next_.startswith(url):
                 next_ = f'{url}?{next_.split("?")[1]}'
-            print(next_)
             data = await self.execute(next_, params=params)
             next_ = data.get('next')
             for d in data['data']:
@@ -117,6 +120,9 @@ class CrudComponent:
         return self.execute(
             url, params=as_params(**params), wrap=self.wrap_list
         )
+
+    async def get_full_list(self, **params):
+        return [d async for d in self.paginate(**params)]
 
     def get(self, id):
         return self.execute('%s/%s' % (self.url, id), wrap=self.wrap)
@@ -158,7 +164,7 @@ class CrudComponent:
         return [self.wrap(d) for d in data['data']]
 
     def list_create_url(self) -> str:
-        if isinstance(self.root, KongEntity):
+        if self.is_entity:
             return f'{self.root.url}/{self.name}'
         else:
             return self.url

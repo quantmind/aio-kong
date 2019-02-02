@@ -14,34 +14,57 @@ class Consumers(CrudComponent):
         for entry in data:
             if not isinstance(entry, dict):
                 raise KongError('dictionary required')
-            username = entry.pop('username', None)
             groups = entry.pop('groups', [])
-            if not username:
-                raise KongError('Consumer username is required')
+            udata = entry.copy()
+            id_ = udata.pop('id', None)
+            username = None
+            if not id_:
+                username = udata.pop('username', None)
+                if not username:
+                    raise KongError('Consumer username or id is required')
+            uid = id_ or username
             try:
-                consumer = await self.get(username)
+                consumer = await self.get(uid)
             except KongError as exc:
                 if exc.status == 404:
-                    consumer = await self.create(username=username, **entry)
+                    consumer = await self.create(**entry)
                 else:
                     raise
             else:
                 if entry:
-                    consumer = await self.update(username, **entry)
-            acls = await consumer.acls()
+                    consumer = await self.update(uid, **udata)
+            acls = await consumer.acls.get_list()
             current_groups = dict(((a['group'], a) for a in acls))
             for group in groups:
                 if group not in current_groups:
-                    await consumer.create_acls(group)
+                    await consumer.acls.create(group=group)
                 else:
                     current_groups.pop(group)
 
             for acl in current_groups.values():
-                await consumer.delete_acls(acl['id'])
+                await consumer.acls.delete(acl['id'])
 
             result.append(consumer.data)
 
         return result
+
+
+class ConsumerAuth(CrudComponent):
+
+    @property
+    def url(self) -> str:
+        return f'{self.root.url}/{self.name}'
+
+    async def create(self):
+        return await self.cli.execute(
+            self.url, 'POST',
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            wrap=self.wrap
+        )
+
+    async def get_or_create(self):
+        secrets = await self.get_list(limit=1)
+        return secrets[0] if secrets else await self.create()
 
 
 class Consumer(KongEntityWithPlugins):
@@ -50,56 +73,14 @@ class Consumer(KongEntityWithPlugins):
     def username(self):
         return self.data.get('username')
 
-    async def jwts(self):
-        url = f'{self.url}/jwt'
-        result = await self.cli.execute(url, 'GET')
-        return result['data']
+    @property
+    def acls(self):
+        return CrudComponent(self, 'acls')
 
-    def create_jwt(self):
-        url = f'{self.url}/jwt'
-        return self.cli.execute(
-            url, 'POST',
-            headers={'Content-Type': 'application/x-www-form-urlencoded'}
-        )
+    @property
+    def jwts(self):
+        return ConsumerAuth(self, 'jwt')
 
-    async def get_or_create_jwt(self):
-        url = f'{self.url}/jwt'
-        result = await self.cli.execute(url, 'GET')
-        secrets = result['data']
-        return secrets[0] if secrets else await self.create_jwt()
-
-    def get_jwt(self, id):
-        url = f'{self.url}/jwt/{id}'
-        return self.cli.execute(url)
-
-    def delete_jwt(self, id):
-        url = f'{self.url}/jwt/{id}'
-        return self.cli.execute(url, 'DELETE')
-
-    async def key_auths(self):
-        url = f'{self.url}/key-auth'
-        result = await self.cli.execute(url, 'GET')
-        return result['data']
-
-    def create_key_auth(self):
-        url = f'{self.url}/key-auth'
-        return self.cli.execute(
-            url, 'POST',
-            headers={'Content-Type': 'application/x-www-form-urlencoded'}
-        )
-
-    def delete_key_auth(self, id):
-        url = f'{self.url}/key-auth/{id}'
-        return self.cli.execute(url, 'DELETE')
-
-    def create_acls(self, group):
-        url = f'{self.url}/acls'
-        return self.cli.execute(url, 'POST', json=dict(group=group))
-
-    def delete_acls(self, id):
-        url = f'{self.url}/acls/{id}'
-        return self.cli.execute(url, 'DELETE')
-
-    def acls(self, **params):
-        params['consumer.id'] = self.id
-        return self.cli.acls.get_list(**params)
+    @property
+    def keyauths(self):
+        return ConsumerAuth(self, 'key-auth')

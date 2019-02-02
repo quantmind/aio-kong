@@ -1,5 +1,6 @@
 consumers:
   - username: an-xxxx-test
+    id: 71021cd0-d63f-4459-a872-b365cc4f231d
     groups:
       - boom
       - bam
@@ -22,7 +23,8 @@ services:
             config:
               anonymous: an-xxxx-test
           - name: request-termination
-            consumer_id: an-xxxx-test
+            consumer:
+              id: 71021cd0-d63f-4459-a872-b365cc4f231d
             config:
               status_code: 403
               message: requires authentication

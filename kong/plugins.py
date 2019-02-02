@@ -7,13 +7,11 @@ class Plugins(CrudComponent):
         params = await self.preprocess_parameters(params)
         return await super().create(**params)
 
-    async def apply_json(self, data, **kwargs):
-        if isinstance(self.root, KongEntity):
-            kwargs[f'{self.root.name}.id'] = self.root.id
+    async def apply_json(self, data):
         if not isinstance(data, list):
             data = [data]
-        plugins = await self.get_list(**kwargs)
-        if not kwargs:
+        plugins = await self.get_full_list()
+        if not self.is_entity:
             plugins = [p for p in plugins if self.root_plugin(p)]
         plugins = dict(((p['name'], p) for p in plugins))
         result = []
@@ -34,10 +32,10 @@ class Plugins(CrudComponent):
         return result
 
     def root_plugin(self, plugin):
-        return (
-            'service' not in plugin and
-            'route' not in plugin and
-            'consumer' not in plugin
+        return not (
+            plugin.get('service') or
+            plugin.get('route') or
+            plugin.get('consumer')
         )
 
     async def preprocess_parameters(self, params):

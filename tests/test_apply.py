@@ -63,7 +63,7 @@ async def test_json_route_plugins(cli):
     plugins = await routes[0].plugins.get_list()
     assert len(plugins) == 3
     cs = await cli.consumers.get('an-xxxx-test')
-    acls = await cs.acls()
+    acls = await cs.acls.get_list()
     assert len(acls) == 2
 
     with open(os.path.join(PATH, 'test61.yaml')) as fp:
@@ -76,7 +76,7 @@ async def test_json_route_plugins(cli):
     plugins = await routes[0].plugins.get_list()
     assert len(plugins) == 1
     cs = await cli.consumers.get('an-xxxx-test')
-    acls = await cs.acls()
+    acls = await cs.acls.get_list()
     assert len(acls) == 1
 
 

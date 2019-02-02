@@ -51,7 +51,7 @@ class Services(CrudComponent):
                 raise KongError('Service name is required')
             if ensure in REMOVE:
                 if await self.has(name):
-                    await self.remove(name)
+                    await self.delete(name)
                 continue
             # backward compatible with config entry
             config = entry.pop('config', None)

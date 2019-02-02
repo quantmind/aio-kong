@@ -113,15 +113,13 @@ async def test_snis(cli):
 
 
 async def test_paginate_params(cli, consumer):
-    await consumer.create_acls('test1')
-    await consumer.create_acls('test2')
+    await consumer.acls.create(group='test1')
+    await consumer.acls.create(group='test2')
     consumer2 = await cli.consumers.create(username='an-xxxx-test')
     consumer3 = await cli.consumers.create(username='test-yy')
-    await consumer2.create_acls('test2')
-    await consumer3.create_acls('test3')
-    users = [u async for u in cli.acls.paginate(group='test1', size=1)]
-    assert len(users) == 1
-    users = [u async for u in cli.acls.paginate(group='test2', size=1)]
-    assert len(users) == 2
-    acls = await consumer.acls(group='test2')
-    assert len(acls) == 1
+    await consumer2.acls.create(group='test2')
+    await consumer3.acls.create(group='test3')
+    acls = [u async for u in cli.acls.paginate(size=1)]
+    assert len(acls) == 4
+    acls = [u async for u in consumer.acls.paginate(size=1)]
+    assert len(acls) == 2
