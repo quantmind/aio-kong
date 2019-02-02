@@ -3,6 +3,9 @@ import json
 import asyncio
 
 import click
+import dotenv
+
+dotenv.load_dotenv()    # noqa
 
 import yaml as _yaml
 
@@ -63,12 +66,12 @@ async def _auth_key(ctx, consumer):
     async with Kong() as cli:
         try:
             c = await cli.consumers.get(consumer)
-            keys = await c.key_auths()
+            keys = await c.keyauths.get_list()
             if keys:
                 key = keys[0]
             else:
-                key = await c.create_key_auth()
-            click.echo(json.dumps(key, indent=4))
+                key = await c.keyauths.create()
+            click.echo(json.dumps(key.data, indent=4))
         except KongError as exc:
             raise click.ClickException(str(exc))
 

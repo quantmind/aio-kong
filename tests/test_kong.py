@@ -1,11 +1,12 @@
 import os
-import pytest
-import yaml
-
-from kong.client import KongError
 
 
-PATH = os.path.dirname(__file__)
+PATH = os.path.join(os.path.dirname(__file__), 'certificates')
+
+
+def read(name):
+    with open(os.path.join(PATH, name)) as fp:
+        return fp.read()
 
 
 def test_client(cli):
@@ -13,12 +14,14 @@ def test_client(cli):
 
 
 async def test_create_service(cli):
-    c = await cli.services.create(
+    srv = await cli.services.create(
         name='test', host='example.upstream', port=8080
     )
-    assert c.name == 'test'
-    assert c.host == 'example.upstream'
-    assert c.id
+    assert srv.name == 'test'
+    assert srv.host == 'example.upstream'
+    assert srv.id
+    assert srv.routes.root == srv
+    assert srv.plugins.root == srv
 
 
 async def test_update_service(cli):
@@ -37,106 +40,40 @@ async def test_routes(cli):
     assert route['service']['id'] == c.id
 
 
-async def test_json(cli):
-    with open(os.path.join(PATH, 'test.yaml')) as fp:
-        manifest = yaml.load(fp)
-    await cli.apply_json(manifest)
-    srv = await cli.services.get('foo')
-    routes = await srv.routes.get_list()
-    assert len(routes) == 2
-    #
-    # check plugins
-    plugins = await srv.plugins.get_list()
-    assert len(plugins) == 2
-
-
-async def test_json2(cli):
-    with open(os.path.join(PATH, 'test2.yaml')) as fp:
-        manifest = yaml.load(fp)
-    await cli.apply_json(manifest)
-    srv = await cli.services.get('foo')
-    routes = await srv.routes.get_list()
-    assert len(routes) == 1
-    #
-    # check plugins
-    plugins = await srv.plugins.get_list()
-    assert len(plugins) == 2
-
-
 async def test_add_certificate(cli):
     c = await cli.certificates.create(
-        cert='-----BEGIN CERTIFICATE-----...',
-        key='-----BEGIN RSA PRIVATE KEY-----...'
+        cert=read('cert1.pem'),
+        key=read('key1.pem')
     )
     assert c.id
     assert len(c.data['snis']) == 0
+    snis = await c.snis.get_list()
+    assert snis == []
     await cli.certificates.delete(c.id)
-
-
-async def test_hedge_cases(cli):
-    with pytest.raises(KongError):
-        await cli.apply_json([])
-
-    with pytest.raises(KongError):
-        with open(os.path.join(PATH, 'test3.yaml')) as fp:
-            await cli.apply_json(yaml.load(fp))
-
-    assert str(cli) == cli.url
-
-
-async def test_json_plugins(cli):
-    with open(os.path.join(PATH, 'test4.yaml')) as fp:
-        await cli.apply_json(yaml.load(fp))
-
-
-async def test_json_route_plugins(cli):
-    with open(os.path.join(PATH, 'test6.yaml')) as fp:
-        await cli.apply_json(yaml.load(fp))
-    with open(os.path.join(PATH, 'test6.yaml')) as fp:
-        await cli.apply_json(yaml.load(fp))
-    srv = await cli.services.get('pippo')
-    plugins = await srv.plugins.get_list()
-    assert len(plugins) == 1
-    routes = await srv.routes.get_list()
-    assert len(routes) == 1
-    plugins = await routes[0].plugins.get_list()
-    assert len(plugins) == 3
-    cs = await cli.consumers.get('an-xxxx-test')
-    acls = await cs.acls()
-    assert len(acls) == 2
-
-    with open(os.path.join(PATH, 'test61.yaml')) as fp:
-        await cli.apply_json(yaml.load(fp))
-    srv = await cli.services.get('pippo')
-    plugins = await srv.plugins.get_list()
-    assert len(plugins) == 0
-    routes = await srv.routes.get_list()
-    assert len(routes) == 1
-    plugins = await routes[0].plugins.get_list()
-    assert len(plugins) == 1
-    cs = await cli.consumers.get('an-xxxx-test')
-    acls = await cs.acls()
-    assert len(acls) == 1
 
 
 async def test_snis(cli):
     c1 = await cli.certificates.create(
-        cert='-----BEGIN CERTIFICATE-----...',
-        key='-----BEGIN RSA PRIVATE KEY-----...'
+        cert=read('cert1.pem'),
+        key=read('key1.pem')
     )
     c2 = await cli.certificates.create(
-        cert='-----BEGIN CERTIFICATE-----...',
-        key='-----BEGIN RSA PRIVATE KEY-----...'
+        cert=read('cert2.pem'),
+        key=read('key2.pem')
     )
     config = {
         'snis': [
             {
                 'name': 'a1.example.com',
-                'ssl_certificate_id': c1['id'],
+                'certificate': {
+                    'id': c1['id']
+                }
             },
             {
                 'name': 'a2.example.com',
-                'ssl_certificate_id': c2['id'],
+                'certificate': {
+                    'id': c2['id']
+                }
             },
         ]
     }
@@ -146,16 +83,18 @@ async def test_snis(cli):
     # CREATE
     for sni in snis:
         sni.pop('created_at')
+        sni.pop('id')
     assert snis == config['snis']
 
     # UPDATE
-    config['snis'][0]['ssl_certificate_id'] = c2['id']
-    config['snis'][1]['ssl_certificate_id'] = c1['id']
+    config['snis'][0]['certificate'] = {'id': c2['id']}
+    config['snis'][1]['certificate'] = {'id': c1['id']}
     resp = await cli.apply_json(config)
     snis = resp['snis']
 
     for sni in snis:
         sni.pop('created_at')
+        sni.pop('id')
     assert snis == config['snis']
 
     # GET
@@ -163,47 +102,24 @@ async def test_snis(cli):
     snis = await cli.snis.get_list()
     assert len(snis) == 2
     snis = {
-        sni.data['name']: sni.data['ssl_certificate_id']
+        sni.data['name']: sni.data['certificate']['id']
         for sni in snis
     }
     expected = {
-        sni['name']: sni['ssl_certificate_id']
+        sni['name']: sni['certificate']['id']
         for sni in config['snis']
     }
     assert snis == expected
 
 
-async def test_ensure_remove(cli):
-    with open(os.path.join(PATH, 'test6.yaml')) as fp:
-        await cli.apply_json(yaml.load(fp))
-    assert await cli.services.has('pippo') is True
-    with open(os.path.join(PATH, 'test7.yaml')) as fp:
-        await cli.apply_json(yaml.load(fp))
-    assert await cli.services.has('pippo') is False
-    with open(os.path.join(PATH, 'test7.yaml')) as fp:
-        await cli.apply_json(yaml.load(fp))
-    assert await cli.services.has('pippo') is False
-
-
-async def test_pagination(cli):
-    with open(os.path.join(PATH, 'test9.yaml')) as fp:
-        await cli.apply_json(yaml.load(fp))
-    consumers = []
-    async for consumer in cli.consumers.paginate():
-        consumers.append(consumer)
-    assert len(consumers) >= 2
-
-
 async def test_paginate_params(cli, consumer):
-    await consumer.create_acls('test1')
-    await consumer.create_acls('test2')
+    await consumer.acls.create(group='test1')
+    await consumer.acls.create(group='test2')
     consumer2 = await cli.consumers.create(username='an-xxxx-test')
     consumer3 = await cli.consumers.create(username='test-yy')
-    await consumer2.create_acls('test2')
-    await consumer3.create_acls('test3')
-    users = [u async for u in cli.acls.paginate(group='test1', size=1)]
-    assert len(users) == 1
-    users = [u async for u in cli.acls.paginate(group='test2', size=1)]
-    assert len(users) == 2
-    acls = await consumer.acls(group='test2')
-    assert len(acls) == 1
+    await consumer2.acls.create(group='test2')
+    await consumer3.acls.create(group='test3')
+    acls = [u async for u in cli.acls.paginate(size=1)]
+    assert len(acls) == 4
+    acls = [u async for u in consumer.acls.paginate(size=1)]
+    assert len(acls) == 2

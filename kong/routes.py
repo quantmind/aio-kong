@@ -1,20 +1,21 @@
 from itertools import zip_longest
 
-from .components import ServiceEntity, KongEntity
+from .components import CrudComponent
 from .utils import as_list
-from .plugins import RoutePlugins
+from .plugins import KongEntityWithPlugins
 
 
-class ServiceRoutes(ServiceEntity):
-    """Routes associates with a service
+class Routes(CrudComponent):
+    """Kong Routes
+
+    Routes are always associated with a Service
     """
-    def wrap(self, data):
-        return Route(self, data)
+    Entity = KongEntityWithPlugins
 
-    def create(self, skip_error=None, **params):
-        params['service'] = dict(id=self.root.id)
-        return self.execute(self.url, 'post', json=params,
-                            wrap=self.wrap, skip_error=skip_error)
+    async def delete(self, id_):
+        route = self.wrap({'id': id_})
+        await route.plugins.delete_all()
+        return await super().delete(id_)
 
     async def apply_json(self, data):
         if not isinstance(data, list):
@@ -37,11 +38,3 @@ class ServiceRoutes(ServiceEntity):
             route.data['plugins'] = await route.plugins.apply_json(plugins)
             result.append(route.data)
         return result
-
-
-class Route(KongEntity):
-    """Object representing a route
-    """
-    @property
-    def plugins(self):
-        return RoutePlugins(self, 'plugins')

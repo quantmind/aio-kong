@@ -12,6 +12,10 @@ def as_list(key, data):
     return data
 
 
+def as_dict(data, key='data'):
+    return {key: data} if not isinstance(data, dict) else data
+
+
 def local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))

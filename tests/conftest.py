@@ -1,8 +1,10 @@
-import pytest
 import asyncio
+
+import pytest
+
 import aiohttp
 
-from kong.client import Kong, KongError
+from kong.client import Kong
 
 
 TESTS = ('test', 'foo', 'pippo')
@@ -21,9 +23,9 @@ def loop():
 async def cli(loop):
     session = aiohttp.ClientSession(loop=loop)
     async with Kong(session=session) as cli:
-        await cleanup(cli)
+        await cli.delete_all()
         yield cli
-        await cleanup(cli)
+        await cli.delete_all()
 
 
 @pytest.fixture()
@@ -38,18 +40,3 @@ async def consumer(cli, service):
     await service.plugins.create(name='jwt')
     consumer = await cli.consumers.create(username='test-xx')
     return consumer
-
-
-async def cleanup(cli):
-    for name in TESTS:
-        try:
-            await cli.services.remove(name)
-        except KongError as exc:
-            if not exc.status == 404:
-                raise
-    for name in CONSUMERS:
-        try:
-            await cli.consumers.delete(name)
-        except KongError as exc:
-            if not exc.status == 404:
-                raise
