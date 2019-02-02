@@ -2,7 +2,7 @@ import pytest
 import asyncio
 import aiohttp
 
-from kong.client import Kong, KongError
+from kong.client import Kong
 
 
 TESTS = ('test', 'foo', 'pippo')
@@ -41,15 +41,6 @@ async def consumer(cli, service):
 
 
 async def cleanup(cli):
-    for name in TESTS:
-        try:
-            await cli.services.remove(name)
-        except KongError as exc:
-            if not exc.status == 404:
-                raise
-    for name in CONSUMERS:
-        try:
-            await cli.consumers.delete(name)
-        except KongError as exc:
-            if not exc.status == 404:
-                raise
+    await cli.services.delete_all()
+    await cli.consumers.delete_all()
+    await cli.plugins.delete_all()

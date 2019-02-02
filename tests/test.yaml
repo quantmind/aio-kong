@@ -9,7 +9,8 @@ services:
     plugins:
       - name: cors
         config:
-          origins: "*"
+          origins:
+              - "*"
       - name: rate-limiting
         config:
           minute: 30

@@ -1,4 +1,5 @@
-from .components import CrudComponent, KongEntity, KongError
+from .components import CrudComponent, KongError
+from .plugins import KongEntityWithPlugins
 
 
 class Consumers(CrudComponent):
@@ -43,7 +44,7 @@ class Consumers(CrudComponent):
         return result
 
 
-class Consumer(KongEntity):
+class Consumer(KongEntityWithPlugins):
 
     @property
     def username(self):
@@ -100,5 +101,5 @@ class Consumer(KongEntity):
         return self.cli.execute(url, 'DELETE')
 
     def acls(self, **params):
-        params['consumer_id'] = self.id
+        params['consumer.id'] = self.id
         return self.cli.acls.get_list(**params)

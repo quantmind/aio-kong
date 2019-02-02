@@ -19,6 +19,10 @@ To run tests, clone and
 ./dev/install.sh
 pytest --cov
 ```
+test certificates were generated using the command
+```
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -nodes -subj '/CN=localhost'
+```
 ## Client
 
 The client can be imported via
@@ -26,11 +30,28 @@ The client can be imported via
 from kong.client import Kong
 ```
 
-In a coroutine::
+In a coroutine:
 ```python
 async with Kong() as cli:
     services = await cli.services.get_list()
     print(json.dumps(services, indent=4))
+```
+The client has handlers for all Kong objects
+
+* ``cli.services`` CRUD operations on services
+* ``cli.routes`` CRUD operations on routes
+* ``cli.plugins`` CRUD operations on plugins
+* ``cli.consumers`` CRUD operations on consumers
+* ``cli.consumers`` CRUD operations on consumers
+* ``cli.certificates`` CRUD operations on TLS certificates
+* ``cli.snis`` CRUD operations on SNIs
+* ``cli.acls`` To list all ACLs
+
+### Apply a configuration
+
+The client allow to apply a configuration object to kong:
+```python
+await cli.apply_json(config)
 ```
 
 ## Command line tool

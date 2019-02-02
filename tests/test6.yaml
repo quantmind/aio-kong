@@ -16,7 +16,8 @@ services:
         plugins:
           - name: cors
             config:
-              origins: "*"
+              origins:
+                - "*"
           - name: jwt
             config:
               anonymous: an-xxxx-test

@@ -1,6 +1,5 @@
 import copy
 import os
-import json
 import typing
 
 import aiohttp
@@ -22,6 +21,8 @@ __all__ = [
 
 
 class Kong:
+    """Kong client
+    """
     url = os.environ.get('KONG_URL', 'http://127.0.0.1:8001')
 
     def __init__(self, url: str = None, session: typing.Any = None) -> None:
@@ -53,7 +54,7 @@ class Kong:
         await self.close()
 
     async def execute(self, url, method=None, headers=None,
-                      callback=None, wrap=None, timeout=None, skip_error=None,
+                      callback=None, wrap=None, timeout=None,
                       **kw):
         if not self.session:
             self.session = aiohttp.ClientSession()
@@ -72,7 +73,7 @@ class Kong:
                 data = await response.json()
             except Exception:
                 data = await response.text()
-            raise KongResponseError(response, json.dumps(data, indent=4))
+            raise KongResponseError(response, data)
         response.raise_for_status()
         data = await response.json()
         return wrap(data) if wrap else data
