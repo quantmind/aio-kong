@@ -21,7 +21,7 @@ jobs:
                         -e KONG_PG_DATABASE=postgres
                         -e "KONG_ADMIN_LISTEN=0.0.0.0:8001"
                         -p 8001:8001 -d kong:1.0.3
-      - run: pyenv install 3.6.3 && pyenv global 3.6.3
+      - run: pyenv install 3.7.2 && pyenv global 3.7.2
       - run:
           name: install
           command: ./dev/install.sh
@@ -36,7 +36,7 @@ jobs:
           command: bash <(curl -s https://codecov.io/bash)
   deploy-release:
     docker:
-      - image: circleci/python:3.6
+      - image: circleci/python:3.7
     steps:
       - checkout
       - run:
