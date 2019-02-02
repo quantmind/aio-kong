@@ -1,10 +1,8 @@
-from .components import CrudComponent, KongEntity
+from .components import CrudComponent
 
 
 class Snis(CrudComponent):
     """Kong SNI API component"""
-    def wrap(self, data):
-        return Sni(self, data)
 
     async def apply_json(self, data):
         """Apply a JSON data object for a service
@@ -20,8 +18,3 @@ class Snis(CrudComponent):
                 sni = await self.create(name=name, **entry)
             result.append(sni.data)
         return result
-
-
-class Sni(KongEntity):
-    """Object representing an sni
-    """

@@ -1,24 +1,17 @@
-from .components import CrudComponent, ServiceEntity, KongError, KongEntity
+from .components import CrudComponent, KongError, KongEntity
 
 
-class PluginMixin:
+class Plugins(CrudComponent):
 
-    def wrap(self, data):
-        return Plugin(self.cli, data)
+    async def create(self, **params):
+        params = await self.preprocess_parameters(params)
+        return await super().create(**params)
 
-    @property
-    def url(self) -> str:
-        return '%s/%s' % (self.cli.url, self.name)
-
-    def get_list(self, **params):
-        url = '%s/%s' % (self.root.url, self.name)
-        return self.execute(url, params=params, wrap=self.wrap_list)
-
-    async def apply_json(self, data, **kwargs):
+    async def apply_json(self, data):
         if not isinstance(data, list):
             data = [data]
-        plugins = await self.get_list(**kwargs)
-        if not kwargs:
+        plugins = await self.get_full_list()
+        if not self.is_entity:
             plugins = [p for p in plugins if self.root_plugin(p)]
         plugins = dict(((p['name'], p) for p in plugins))
         result = []
@@ -39,7 +32,11 @@ class PluginMixin:
         return result
 
     def root_plugin(self, plugin):
-        return 'service_id' not in plugin and 'route_id' not in plugin
+        return not (
+            plugin.get('service') or
+            plugin.get('route') or
+            plugin.get('consumer')
+        )
 
     async def preprocess_parameters(self, params):
         await anonymous(self.cli, params)
@@ -53,49 +50,17 @@ class PluginMixin:
         return await super().update(id, **params)
 
 
-class Plugins(PluginMixin, CrudComponent):
-    pass
+class KongEntityWithPlugins(KongEntity):
 
-
-class ServicePlugins(PluginMixin, ServiceEntity):
-
-    async def create(self, skip_error=None, **params):
-        params['service_id'] = self.root.id
-        params = await self.preprocess_parameters(params)
-        return await self.execute(
-            self.url, 'post', json=params,
-            wrap=self.wrap, skip_error=skip_error
-        )
-
-    async def apply_json(self, data, **kwargs):
-        kwargs['service_id'] = self.root.id
-        return await super().apply_json(data, **kwargs)
-
-
-class RoutePlugins(PluginMixin, CrudComponent):
-    """Plugins associated with a Route
-    """
-    async def create(self, skip_error=None, **params):
-        params['route_id'] = self.root.id
-        params = await self.preprocess_parameters(params)
-        return await self.execute(
-            self.url, 'post', json=params,
-            wrap=self.wrap, skip_error=skip_error
-        )
-
-    async def apply_json(self, data, **kwargs):
-        kwargs['route_id'] = self.root.id
-        return await super().apply_json(data, **kwargs)
-
-
-class Plugin(KongEntity):
-    pass
+    @property
+    def plugins(self):
+        return Plugins(self)
 
 
 async def consumer_id_from_username(cli, params):
-    if 'consumer_id' in params:
-        c = await cli.consumers.get(params['consumer_id'])
-        params['consumer_id'] = c['id']
+    if 'consumer.id' in params:
+        c = await cli.consumers.get(params['consumer.id'])
+        params['consumer.id'] = c['id']
     return params
 
 

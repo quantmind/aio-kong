@@ -11,4 +11,5 @@ services:
         plugins:
           - name: cors
             config:
-              origins: "*"
+              origins:
+                - "*"

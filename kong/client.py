@@ -1,16 +1,14 @@
 import copy
 import os
-import json
 import typing
 
 import aiohttp
 
-from .components import KongError, KongResponseError
+from .components import KongError, KongResponseError, CrudComponent
 from .services import Services
 from .plugins import Plugins
 from .consumers import Consumers
 from .certificates import Certificates
-from .acls import Acls
 from .snis import Snis
 
 
@@ -22,6 +20,8 @@ __all__ = [
 
 
 class Kong:
+    """Kong client
+    """
     url = os.environ.get('KONG_URL', 'http://127.0.0.1:8001')
 
     def __init__(self, url: str = None, session: typing.Any = None) -> None:
@@ -31,7 +31,7 @@ class Kong:
         self.plugins = Plugins(self)
         self.consumers = Consumers(self)
         self.certificates = Certificates(self)
-        self.acls = Acls(self)
+        self.acls = CrudComponent(self, 'acls')
         self.snis = Snis(self)
 
     def __repr__(self) -> str:
@@ -53,7 +53,7 @@ class Kong:
         await self.close()
 
     async def execute(self, url, method=None, headers=None,
-                      callback=None, wrap=None, timeout=None, skip_error=None,
+                      callback=None, wrap=None, timeout=None,
                       **kw):
         if not self.session:
             self.session = aiohttp.ClientSession()
@@ -72,7 +72,7 @@ class Kong:
                 data = await response.json()
             except Exception:
                 data = await response.text()
-            raise KongResponseError(response, json.dumps(data, indent=4))
+            raise KongResponseError(response, data)
         response.raise_for_status()
         data = await response.json()
         return wrap(data) if wrap else data
@@ -90,3 +90,9 @@ class Kong:
                 raise KongError('Kong object %s not available' % name)
             result[name] = await o.apply_json(data)
         return result
+
+    async def delete_all(self):
+        await self.services.delete_all()
+        await self.consumers.delete_all()
+        await self.plugins.delete_all()
+        await self.certificates.delete_all()
