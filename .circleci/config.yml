@@ -21,8 +21,9 @@ jobs:
                         -e KONG_PG_DATABASE=postgres
                         -e "KONG_ADMIN_LISTEN=0.0.0.0:8001"
                         -p 8001:8001 -d kong:1.0.3
-      - run: pyenv install -l
-      - run: pyenv install 3.7.1 && pyenv global 3.7.1
+      - run: git clone git://github.com/pyenv/pyenv-update.git $(pyenv root)/plugins/pyenv-update
+      - run: pyenv update && pyenv install -l
+      - run: pyenv install 3.7.2 && pyenv global 3.7.2
       - run:
           name: install
           command: ./dev/install.sh
