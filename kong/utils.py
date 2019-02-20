@@ -1,4 +1,5 @@
 import socket
+from uuid import UUID
 from multidict import MultiDict
 
 
@@ -29,3 +30,10 @@ def as_params(*, params=None, **kwargs):
     params = MultiDict(params if params is not None else {})
     params.update(kwargs)
     return params
+
+
+def uid(id_):
+    try:
+        return str(UUID(id_))
+    except ValueError:
+        return id_

@@ -1,6 +1,6 @@
 import json
 
-from .utils import as_params, as_dict
+from .utils import as_params, as_dict, uid
 
 
 class KongError(Exception):
@@ -124,23 +124,25 @@ class CrudComponent:
     async def get_full_list(self, **params):
         return [d async for d in self.paginate(**params)]
 
-    def get(self, id):
-        return self.execute('%s/%s' % (self.url, id), wrap=self.wrap)
+    def get(self, id_):
+        url = f'{self.url}/{uid(id_)}'
+        return self.execute(url, wrap=self.wrap)
 
-    def has(self, id):
-        return self.execute('%s/%s' % (self.url, id), 'get',
-                            callback=self.head)
+    def has(self, id_):
+        url = f'{self.url}/{uid(id_)}'
+        return self.execute(url, 'get', callback=self.head)
 
     def create(self, **params):
         url = self.list_create_url()
         return self.execute(url, 'post', json=params, wrap=self.wrap)
 
-    def update(self, id, **params):
-        url = '%s/%s' % (self.url, id)
+    def update(self, id_, **params):
+        url = f'{self.url}/{uid(id_)}'
         return self.execute(url, 'patch', json=params, wrap=self.wrap)
 
-    def delete(self, id):
-        return self.execute('%s/%s' % (self.url, id), 'delete')
+    def delete(self, id_):
+        url = f'{self.url}/{uid(id_)}'
+        return self.execute(url, 'delete')
 
     async def delete_all(self) -> int:
         n = 0
@@ -154,7 +156,7 @@ class CrudComponent:
             return False
         elif response.status == 200:
             return True
-        else:
+        else:   # pragma: no cover
             raise KongResponseError(response)
 
     def wrap(self, data):

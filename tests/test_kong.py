@@ -11,6 +11,7 @@ def read(name):
 
 def test_client(cli):
     assert cli.session
+    assert str(cli.services) == repr(cli.services)
 
 
 async def test_create_service(cli):
@@ -22,6 +23,8 @@ async def test_create_service(cli):
     assert srv.id
     assert srv.routes.root == srv
     assert srv.plugins.root == srv
+    assert str(srv)
+    assert 'id' in srv
 
 
 async def test_update_service(cli):
