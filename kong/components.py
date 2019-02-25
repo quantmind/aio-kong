@@ -52,8 +52,8 @@ class CrudComponent(Component):
             self.url, params=as_params(**params), wrap=self.wrap_list
         )
 
-    async def paginate(self, **params):
-        next_ = self.url
+    async def paginate(self, url: str = None, **params):
+        next_ = url or self.url
         params = as_params(**params)
         while next_:
             data = await self.execute(next_, params=params)

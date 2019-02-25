@@ -10,9 +10,9 @@ class PluginMixin:
     def url(self) -> str:
         return '%s/%s' % (self.cli.url, self.name)
 
-    def get_list(self, **params):
+    async def get_list(self, **params):
         url = '%s/%s' % (self.root.url, self.name)
-        return self.execute(url, params=params, wrap=self.wrap_list)
+        return [plugin async for plugin in self.paginate(url, **params)]
 
     async def apply_json(self, data, **kwargs):
         if not isinstance(data, list):
