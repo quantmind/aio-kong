@@ -58,9 +58,9 @@ class KongEntityWithPlugins(KongEntity):
 
 
 async def consumer_id_from_username(cli, params):
-    if 'consumer.id' in params:
-        c = await cli.consumers.get(params['consumer.id'])
-        params['consumer.id'] = c['id']
+    if 'id' in (params.get('consumer') or {}):
+        c = await cli.consumers.get(params['consumer']['id'])
+        params['consumer']['id'] = c['id']
     return params
 
 
