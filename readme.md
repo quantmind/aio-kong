@@ -33,7 +33,7 @@ In a coroutine:
 ```python
 async with Kong() as cli:
     services = await cli.services.get_list()
-    print(json.dumps(services, indent=4))
+    print(json.dumps([s.data for s in services], indent=4))
 ```
 The client has handlers for all Kong objects
 
