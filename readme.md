@@ -18,6 +18,12 @@ To run tests, clone and
 ./dev/install.sh
 pytest --cov
 ```
+
+:warning: If you don't have Kong running locally, you can run your tests on a test environment with :
+```bash
+./dev/run_tests.sh
+```
+
 test certificates were generated using the command
 ```
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -nodes -subj '/CN=localhost'

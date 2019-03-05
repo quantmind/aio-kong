@@ -1,0 +1,30 @@
+version: '2.2'
+services:
+    kong:
+        build: test_kong
+        container_name: kong_test
+        ports:
+            - '8001:8001'
+        environment:
+            - KONG_DATABASE=postgres
+            - KONG_PG_HOST=kongsql
+            - KONG_PG_PASSWORD=kong
+            - KONG_LOG_LEVEL=debug
+            - KONG_PROXY_ACCESS_LOG=/dev/stdout
+            - KONG_ADMIN_ACCESS_LOG=/dev/stdout
+            - KONG_PROXY_ERROR_LOG=/dev/stderr
+            - KONG_ADMIN_ERROR_LOG=/dev/stderr
+            - KONG_ADMIN_LISTEN=0.0.0.0:8001
+        depends_on:
+            - kongsql
+        restart: always
+
+    kongsql:
+        image: postgres:9.6.5
+        container_name: kongsql_test
+        user: ''
+        restart: always
+        environment:
+            - POSTGRES_PASSWORD=kong
+            - POSTGRES_USER=kong
+            - POSTGRES_DB=kong
