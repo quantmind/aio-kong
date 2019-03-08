@@ -80,6 +80,15 @@ async def test_json_route_plugins(cli):
     assert len(acls) == 1
 
 
+async def test_auth_handling(cli):
+    with open(os.path.join(PATH, 'test_basic_auth.yaml')) as fp:
+        await cli.apply_json(yaml.load(fp))
+    consumer = await cli.consumers.get('admin')
+    auths = await consumer.basicauths.get_list()
+    assert len(auths) == 1
+    assert auths[0]['username'] == 'admin_creds'
+
+
 async def test_ensure_remove(cli):
     with open(os.path.join(PATH, 'test6.yaml')) as fp:
         await cli.apply_json(yaml.load(fp))

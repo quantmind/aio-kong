@@ -15,6 +15,7 @@ class Consumers(CrudComponent):
             if not isinstance(entry, dict):
                 raise KongError('dictionary required')
             groups = entry.pop('groups', [])
+            auths = entry.pop('auths', [])
             udata = entry.copy()
             id_ = udata.pop('id', None)
             username = None
@@ -44,6 +45,10 @@ class Consumers(CrudComponent):
             for acl in current_groups.values():
                 await consumer.acls.delete(acl['id'])
 
+            for auth_data in auths:
+                auth = ConsumerAuth(consumer, auth_data['type'])
+                await auth.create(data=auth_data.get('config', {}))
+
             result.append(consumer.data)
 
         return result
@@ -55,11 +60,12 @@ class ConsumerAuth(CrudComponent):
     def url(self) -> str:
         return f'{self.root.url}/{self.name}'
 
-    async def create(self):
+    async def create(self, **kw):
         return await self.cli.execute(
             self.url, 'POST',
             headers={'Content-Type': 'application/x-www-form-urlencoded'},
-            wrap=self.wrap
+            wrap=self.wrap,
+            **kw
         )
 
     async def get_or_create(self):
@@ -84,3 +90,7 @@ class Consumer(KongEntityWithPlugins):
     @property
     def keyauths(self):
         return ConsumerAuth(self, 'key-auth')
+
+    @property
+    def basicauths(self):
+        return ConsumerAuth(self, 'basic-auth')
