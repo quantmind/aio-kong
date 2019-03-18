@@ -1,11 +1,17 @@
 from .components import CrudComponent, KongError
 from .plugins import KongEntityWithPlugins
+from .auths import auth_factory
 
 
 class Consumers(CrudComponent):
 
     def wrap(self, data):
         return Consumer(self, data)
+
+    async def apply_credentials(self, auths, consumer):
+        for auth_data in auths:
+            auth = auth_factory(consumer, auth_data['type'])
+            await auth.create_or_update_credentials(auth_data['config'])
 
     async def apply_json(self, data):
         if not isinstance(data, list):
@@ -45,32 +51,11 @@ class Consumers(CrudComponent):
             for acl in current_groups.values():
                 await consumer.acls.delete(acl['id'])
 
-            for auth_data in auths:
-                auth = ConsumerAuth(consumer, auth_data['type'])
-                await auth.create(data=auth_data.get('config', {}))
+            await self.apply_credentials(auths, consumer)
 
             result.append(consumer.data)
 
         return result
-
-
-class ConsumerAuth(CrudComponent):
-
-    @property
-    def url(self) -> str:
-        return f'{self.root.url}/{self.name}'
-
-    async def create(self, **kw):
-        return await self.cli.execute(
-            self.url, 'POST',
-            headers={'Content-Type': 'application/x-www-form-urlencoded'},
-            wrap=self.wrap,
-            **kw
-        )
-
-    async def get_or_create(self):
-        secrets = await self.get_list(limit=1)
-        return secrets[0] if secrets else await self.create()
 
 
 class Consumer(KongEntityWithPlugins):
@@ -85,12 +70,12 @@ class Consumer(KongEntityWithPlugins):
 
     @property
     def jwts(self):
-        return ConsumerAuth(self, 'jwt')
+        return auth_factory(self, 'jwt')
 
     @property
     def keyauths(self):
-        return ConsumerAuth(self, 'key-auth')
+        return auth_factory(self, 'key-auth')
 
     @property
     def basicauths(self):
-        return ConsumerAuth(self, 'basic-auth')
+        return auth_factory(self, 'basic-auth')

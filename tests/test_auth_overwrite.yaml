@@ -5,3 +5,6 @@ consumers:
         config:
           username: admin_creds
           password: hunter3
+      - type: key-auth
+        config:
+          key: DonKeyKong
