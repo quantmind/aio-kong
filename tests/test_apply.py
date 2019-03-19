@@ -107,6 +107,7 @@ async def test_auth_overwrite(cli):
     key_auths = await consumer.keyauths.get_list()
     assert len(key_auths) == 1
 
+
 async def test_ensure_remove(cli):
     with open(os.path.join(PATH, 'test6.yaml')) as fp:
         await cli.apply_json(yaml.load(fp))

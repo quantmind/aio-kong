@@ -24,7 +24,7 @@ class ConsumerAuth(CrudComponent):
         try:
             return next(cred for cred
                         in await self.get_list()
-                        if cred.get(self.unique_field, None) == cur_unique)['id']
+                        if cred[self.unique_field] == cur_unique)['id']
         except StopIteration:
             return None
 
