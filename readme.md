@@ -18,6 +18,12 @@ To run tests, clone and
 ./dev/install.sh
 pytest --cov
 ```
+
+:warning: If you don't have Kong running locally, you can run your tests on a test environment with :
+```bash
+./dev/run_tests.sh
+```
+
 test certificates were generated using the command
 ```
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -nodes -subj '/CN=localhost'
@@ -33,7 +39,7 @@ In a coroutine:
 ```python
 async with Kong() as cli:
     services = await cli.services.get_list()
-    print(json.dumps(services, indent=4))
+    print(json.dumps([s.data for s in services], indent=4))
 ```
 The client has handlers for all Kong objects
 

@@ -1,0 +1,10 @@
+consumers:
+  - username: admin
+    auths:
+      - type: basic-auth
+        config:
+          username: admin_creds
+          password: hunter2
+      - type: key-auth
+        config:
+          key: DonKeyKong

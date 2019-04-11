@@ -80,6 +80,34 @@ async def test_json_route_plugins(cli):
     assert len(acls) == 1
 
 
+async def test_auth_handling(cli):
+    with open(os.path.join(PATH, 'test_auth.yaml')) as fp:
+        await cli.apply_json(yaml.load(fp))
+    consumer = await cli.consumers.get('admin')
+
+    basic_auths = await consumer.basicauths.get_list()
+    assert len(basic_auths) == 1
+    assert basic_auths[0]['username'] == 'admin_creds'
+
+    key_auths = await consumer.keyauths.get_list()
+    assert len(key_auths) == 1
+
+
+async def test_auth_overwrite(cli):
+    with open(os.path.join(PATH, 'test_auth.yaml')) as fp:
+        await cli.apply_json(yaml.load(fp))
+    with open(os.path.join(PATH, 'test_auth_overwrite.yaml')) as fp:
+        await cli.apply_json(yaml.load(fp))
+    consumer = await cli.consumers.get('admin')
+
+    basic_auths = await consumer.basicauths.get_list()
+    assert len(basic_auths) == 1
+    assert basic_auths[0]['username'] == 'admin_creds'
+
+    key_auths = await consumer.keyauths.get_list()
+    assert len(key_auths) == 1
+
+
 async def test_ensure_remove(cli):
     with open(os.path.join(PATH, 'test6.yaml')) as fp:
         await cli.apply_json(yaml.load(fp))
