@@ -24,9 +24,10 @@ class Kong:
     """
     url = os.environ.get('KONG_URL', 'http://127.0.0.1:8001')
 
-    def __init__(self, url: str = None, session: typing.Any = None) -> None:
+    def __init__(self, url: str = None, session: typing.Any = None, request_kwargs: typing.Dict = None) -> None:
         self.url = url or self.url
         self.session = session
+        self.request_kwargs
         self.services = Services(self)
         self.plugins = Plugins(self)
         self.consumers = Consumers(self)
