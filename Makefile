@@ -15,3 +15,6 @@ clean:		## remove python cache files
 
 version:	## dipsplay software version
 	@python3 -c "import kong; print(kong.__version__)"
+
+black:		## check black formatting
+	black --check kong tests

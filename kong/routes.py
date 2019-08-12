@@ -1,8 +1,8 @@
 from itertools import zip_longest
 
 from .components import CrudComponent
-from .utils import as_list
 from .plugins import KongEntityWithPlugins
+from .utils import as_list
 
 
 class Routes(CrudComponent):
@@ -10,10 +10,11 @@ class Routes(CrudComponent):
 
     Routes are always associated with a Service
     """
+
     Entity = KongEntityWithPlugins
 
     async def delete(self, id_):
-        route = self.wrap({'id': id_})
+        route = self.wrap({"id": id_})
         await route.plugins.delete_all()
         return await super().delete(id_)
 
@@ -27,14 +28,14 @@ class Routes(CrudComponent):
                 if route:
                     await self.delete(route.id)
                 continue
-            plugins = d.pop('plugins', [])
-            as_list('hosts', d)
-            as_list('paths', d)
-            as_list('methods', d)
+            plugins = d.pop("plugins", [])
+            as_list("hosts", d)
+            as_list("paths", d)
+            as_list("methods", d)
             if not route:
                 route = await self.create(**d)
             else:
                 route = await self.update(route.id, **d)
-            route.data['plugins'] = await route.plugins.apply_json(plugins)
+            route.data["plugins"] = await route.plugins.apply_json(plugins)
             result.append(route.data)
         return result

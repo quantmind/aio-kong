@@ -5,7 +5,7 @@
 [![CircleCI](https://circleci.com/gh/quantmind/aio-kong.svg?style=svg)](https://circleci.com/gh/quantmind/aio-kong)
 [![codecov](https://codecov.io/gh/quantmind/aio-kong/branch/master/graph/badge.svg)](https://codecov.io/gh/quantmind/aio-kong)
 
-Tested with [kong][] v1.0.x
+Tested with [kong][] v1.2.x
 
 ## Installation & Testing
 
