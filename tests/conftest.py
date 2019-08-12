@@ -1,14 +1,11 @@
 import asyncio
 
-import pytest
-
 import aiohttp
-
+import pytest
 from kong.client import Kong
 
-
-TESTS = ('test', 'foo', 'pippo')
-CONSUMERS = ('an-xxxx-test', 'test-xx', 'test-yy')
+TESTS = ("test", "foo", "pippo")
+CONSUMERS = ("an-xxxx-test", "test-xx", "test-yy")
 
 
 @pytest.fixture(autouse=True)
@@ -30,13 +27,11 @@ async def cli(loop):
 
 @pytest.fixture()
 async def service(cli):
-    return await cli.services.create(
-        name='test', host='example.upstream', port=8080
-    )
+    return await cli.services.create(name="test", host="example.upstream", port=8080)
 
 
 @pytest.fixture()
 async def consumer(cli, service):
-    await service.plugins.create(name='jwt')
-    consumer = await cli.consumers.create(username='test-xx')
+    await service.plugins.create(name="jwt")
+    consumer = await cli.consumers.create(username="test-xx")
     return consumer

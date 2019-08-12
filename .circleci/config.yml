@@ -8,22 +8,22 @@ jobs:
       - checkout
       - run: docker run --name postgres -d postgres:10
       - run: docker run --link postgres:postgres
-                     -e KONG_DATABASE=postgres
-                     -e KONG_PG_HOST=postgres
-                     -e KONG_PG_USER=postgres
-                     -e KONG_PG_DATABASE=postgres
-                     kong:1.0.3 kong migrations bootstrap
+          -e KONG_DATABASE=postgres
+          -e KONG_PG_HOST=postgres
+          -e KONG_PG_USER=postgres
+          -e KONG_PG_DATABASE=postgres
+          kong:1.2.1 kong migrations bootstrap
       - run: docker run --name kong
-                        --link postgres:postgres
-                        -e KONG_DATABASE=postgres
-                        -e KONG_PG_HOST=postgres
-                        -e KONG_PG_USER=postgres
-                        -e KONG_PG_DATABASE=postgres
-                        -e "KONG_ADMIN_LISTEN=0.0.0.0:8001"
-                        -p 8001:8001 -d kong:1.0.3
+          --link postgres:postgres
+          -e KONG_DATABASE=postgres
+          -e KONG_PG_HOST=postgres
+          -e KONG_PG_USER=postgres
+          -e KONG_PG_DATABASE=postgres
+          -e "KONG_ADMIN_LISTEN=0.0.0.0:8001"
+          -p 8001:8001 -d kong:1.2.1
       # - run: git clone git://github.com/pyenv/pyenv-update.git $(pyenv root)/plugins/pyenv-update
       # - run: pyenv update && pyenv install -l
-      # - run: pyenv install 3.7.2 && pyenv global 3.7.2
+      # - run: pyenv install 3.7.3 && pyenv global 3.7.3
       - run: pyenv install 3.6.3 && pyenv global 3.6.3
       - run:
           name: install
@@ -31,6 +31,9 @@ jobs:
       - run:
           name: flake8
           command: flake8
+      - run:
+          name: black
+          command: make black
       - run:
           name: test
           command: pytest --cov
@@ -57,7 +60,6 @@ jobs:
       - run:
           name: create tag
           command: agilekit git release --yes
-
 
 workflows:
   version: 2

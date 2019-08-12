@@ -1,5 +1,6 @@
 import socket
 from uuid import UUID
+
 from multidict import MultiDict
 
 
@@ -13,7 +14,7 @@ def as_list(key, data):
     return data
 
 
-def as_dict(data, key='data'):
+def as_dict(data, key="data"):
     return {key: data} if not isinstance(data, dict) else data
 
 
