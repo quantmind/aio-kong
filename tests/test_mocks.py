@@ -17,5 +17,5 @@ async def test_request_kwargs(loop):
     cli = Kong(session=session, request_kwargs=dict(ssl=False))
     cli.session.request = async_mock
     kwargs = await cli.execute("...", callback=async_passthrough, bla="foo")
-    kwargs.pop('headers')
+    kwargs.pop("headers")
     assert kwargs == dict(ssl=False, bla="foo")
