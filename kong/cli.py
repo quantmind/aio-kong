@@ -1,12 +1,7 @@
-
-import json
 import asyncio
+import json
 
 import click
-import dotenv
-
-dotenv.load_dotenv()    # noqa
-
 import yaml as _yaml
 
 from . import __version__
@@ -15,26 +10,12 @@ from .utils import local_ip
 
 
 @click.command()
+@click.option("--version", is_flag=True, default=False, help="Display version and exit")
+@click.option("--ip", is_flag=True, default=False, help="Show local IP address")
 @click.option(
-    '--version',
-    is_flag=True,
-    default=False,
-    help='Display version and exit'
+    "--key-auth", help="Create or display an authentication key for a consumer"
 )
-@click.option(
-    '--ip',
-    is_flag=True,
-    default=False,
-    help='Show local IP address'
-)
-@click.option(
-    '--key-auth',
-    help='Create or display an authentication key for a consumer'
-)
-@click.option(
-    '--yaml', type=click.File('r'),
-    help='Yaml configuration to upload'
-)
+@click.option("--yaml", type=click.File("r"), help="Yaml configuration to upload")
 @click.pass_context
 def kong(ctx, version, ip, key_auth, yaml):
     if version:
@@ -56,7 +37,7 @@ def _run(coro):
 async def _yml(ctx, yaml):
     async with Kong() as cli:
         try:
-            result = await cli.apply_json(_yaml.load(yaml))
+            result = await cli.apply_json(_yaml.load(yaml, Loader=_yaml.FullLoader))
             click.echo(json.dumps(result, indent=4))
         except KongError as exc:
             raise click.ClickException(str(exc))
@@ -76,5 +57,5 @@ async def _auth_key(ctx, consumer):
             raise click.ClickException(str(exc))
 
 
-def main():     # pragma    nocover
+def main():  # pragma    nocover
     kong()

@@ -11,7 +11,7 @@ class Snis(CrudComponent):
             data = [data]
         result = []
         for entry in data:
-            name = entry.pop('name')
+            name = entry.pop("name")
             if await self.has(name):
                 sni = await self.update(name, **entry)
             else:

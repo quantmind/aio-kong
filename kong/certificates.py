@@ -3,7 +3,6 @@ from .snis import Snis
 
 
 class Certificate(KongEntity):
-
     @property
     def snis(self):
         return Snis(self)
@@ -11,4 +10,5 @@ class Certificate(KongEntity):
 
 class Certificates(CrudComponent):
     """Kong TLS certificate component"""
+
     Entity = Certificate

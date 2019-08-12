@@ -1,4 +1,6 @@
 # testing and linting
+black
+isort[requirements]
 mypy
 pytest
 pytest-cov
@@ -6,3 +8,6 @@ pytest-aiohttp
 flake8
 twine
 agile-toolkit
+flake8-blind-except
+# flake8-builtins
+flake8-commas
