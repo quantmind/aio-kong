@@ -23,8 +23,8 @@ jobs:
           -p 8001:8001 -d kong:1.2.1
       # - run: git clone git://github.com/pyenv/pyenv-update.git $(pyenv root)/plugins/pyenv-update
       # - run: pyenv update && pyenv install -l
-      - run: pyenv install 3.7.3 && pyenv global 3.7.3
-      # - run: pyenv install 3.6.3 && pyenv global 3.6.3
+      # - run: pyenv install 3.7.3 && pyenv global 3.7.3
+      - run: pyenv install 3.6.3 && pyenv global 3.6.3
       - run:
           name: install
           command: ./dev/install.sh
