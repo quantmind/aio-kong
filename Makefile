@@ -79,7 +79,7 @@ bundle:		## build python 3.8 bundle
 github-tag:	## new tag in github
 	@docker run \
 		-v $(PWD):/workspace \
-		-e GITHUB_TOKEN=$(GITHUB_SECRET) \
+		-e GITHUB_TOKEN=$(QMBOT_TOKEN) \
 		pykong38 \
 		agilekit git release --yes
 
