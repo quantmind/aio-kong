@@ -69,3 +69,26 @@ test-version:	## validate version with pypi
 		-v $(PWD):/workspace \
 		pykong38 \
 		agilekit git validate
+
+bundle:		## build python 3.8 bundle
+	@docker run --rm \
+		-v $(PWD):/workspace \
+		pykong38 \
+		python setup.py sdist bdist_wheel
+
+github-tag:	## new tag in github
+	@docker run \
+		-v $(PWD):/workspace \
+		-e GITHUB_TOKEN=$(GITHUB_SECRET) \
+		pykong38 \
+		agilekit git release --yes
+
+pypi:		## release to pypi and github tag
+	@docker run --rm \
+		-v $(PWD):/workspace \
+		pykong38 \
+		twine upload dist/* --username lsbardel --password $(PYPI_PASSWORD)
+
+release:	## release to pypi and github tag
+	make pypi
+	make github-tag
