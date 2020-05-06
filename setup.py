@@ -46,7 +46,7 @@ meta = dict(
     install_requires=requirements('dev/requirements.txt'),
     entry_points={
         "console_scripts": [
-            "kong = kong.cli:main"
+            "kongfig = kong.cli:main"
         ]
     },
     classifiers=[
