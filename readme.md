@@ -71,10 +71,10 @@ await cli.apply_json(config)
 
 ## Command line tool
 
-The library install the `kong` command line tool for uploading kong configuration files.
+The library install the `kongfig` command line tool for uploading kong configuration files.
 
 ```
-pykong --yaml config.yaml
+kongfig --yaml config.yaml
 ```
 
 [kong]: https://docs.konghq.com
