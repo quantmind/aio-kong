@@ -34,6 +34,12 @@ py37:		## build python 3.7 image for testing
 py38:		## build python 3.8 image for testing
 	docker build -f dev/Dockerfile --build-arg PY_VERSION=python:3.8.2 -t pykong38 .
 
+test-codecov:	## upload code coverage
+	@docker run --rm \
+		-v $(PWD):/workspace \
+		pykong38 \
+		codecov --token $(CODECOV_TOKEN) --file ./build/coverage.xml
+
 test-py36:	## test with python 3.6
 	@docker run --rm --network=host pykong36 pytest
 
@@ -57,3 +63,9 @@ test-flake8: 	## run flake8 in CI
 		-v $(PWD)/build:/workspace/build \
 		pykong38 \
 		flake8
+
+test-version:	## validate version with pypi
+	@docker run \
+		-v $(PWD):/workspace \
+		pykong38 \
+		agilekit git validate
