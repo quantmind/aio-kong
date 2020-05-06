@@ -11,3 +11,4 @@ agile-toolkit
 flake8-blind-except
 # flake8-builtins
 flake8-commas
+codecov
