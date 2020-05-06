@@ -1,6 +1,12 @@
 [run]
 source = kong
 
+[html]
+directory = build/coverage/html
+
+[xml]
+output = build/coverage.xml
+
 [report]
 exclude_lines =
     pragma: no cover
