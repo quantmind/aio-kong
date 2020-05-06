@@ -46,7 +46,7 @@ meta = dict(
     install_requires=requirements('dev/requirements.txt'),
     entry_points={
         "console_scripts": [
-            "kong = kong.cli:main"
+            "kongfig = kong.cli:main"
         ]
     },
     classifiers=[
@@ -59,6 +59,7 @@ meta = dict(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Utilities'
     ]
 )
