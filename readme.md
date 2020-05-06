@@ -5,7 +5,7 @@
 [![CircleCI](https://circleci.com/gh/quantmind/aio-kong.svg?style=svg)](https://circleci.com/gh/quantmind/aio-kong)
 [![codecov](https://codecov.io/gh/quantmind/aio-kong/branch/master/graph/badge.svg)](https://codecov.io/gh/quantmind/aio-kong)
 
-Tested with [kong][] v1.2.x
+Tested with [kong][] v2.0
 
 ## Installation & Testing
 
@@ -19,9 +19,9 @@ To run tests, clone and
 pytest --cov
 ```
 
-:warning: If you don't have Kong running locally, you can run your tests on a test environment with :
+:warning: If you don't have Kong or postgres running locally, run the services first
 ```bash
-./dev/run_tests.sh
+make services
 ```
 
 test certificates were generated using the command
