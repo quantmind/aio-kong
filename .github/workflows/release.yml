@@ -35,6 +35,7 @@ jobs:
     env:
       PYTHON_ENV: ci
       PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      QMBOT_TOKEN: ${{ secrets.QMBOT_TOKEN }}
 
     steps:
       - uses: actions/checkout@v2
