@@ -3,6 +3,9 @@
 help:
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
 
+black: 		## run black and fix files
+	@./dev/run-black.sh
+
 clean:		## remove python cache files
 	find . -name '__pycache__' | xargs rm -rf
 	find . -name '*.pyc' -delete
@@ -21,9 +24,6 @@ services:	## Starts services
 
 services-ci:	## Starts CI services
 	@docker-compose -f ./dev/docker-compose.yml up --remove-orphans -d
-
-test-black:	## check black formatting
-	black --check kong tests
 
 py36:		## build python 3.6 image for testing
 	docker build -f dev/Dockerfile --build-arg PY_VERSION=python:3.6.10 -t pykong36 .
@@ -45,3 +45,15 @@ test-py38:	## test with python 3.8 with coverage
 		-v $(PWD)/build:/workspace/build \
 		pykong38 \
 		pytest --cov --cov-report xml
+
+test-black: 	## run black check in CI
+	@docker run --rm \
+		-v $(PWD)/build:/workspace/build \
+		pykong38 \
+		./dev/run-black.sh --check
+
+test-flake8: 	## run flake8 in CI
+	@docker run --rm \
+		-v $(PWD)/build:/workspace/build \
+		pykong38 \
+		flake8

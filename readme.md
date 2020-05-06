@@ -63,7 +63,7 @@ await cli.apply_json(config)
 
 The library install the ``kong`` command line tool for uploading kong configuration files.
 ```
-kong --yaml config.yaml
+pykong --yaml config.yaml
 ```
 
 [kong]: https://docs.konghq.com
