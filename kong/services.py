@@ -1,3 +1,5 @@
+from typing import Dict, List, Union
+
 from .components import CrudComponent, KongError
 from .plugins import KongEntityWithPlugins
 from .routes import Routes
@@ -12,11 +14,11 @@ class Service(KongEntityWithPlugins):
     """
 
     @property
-    def routes(self):
+    def routes(self) -> Routes:
         return Routes(self)
 
     @property
-    def host(self):
+    def host(self) -> str:
         return self.data.get("host")
 
 
@@ -32,7 +34,7 @@ class Services(CrudComponent):
         await srv.plugins.delete_all()
         return await super().delete(id_)
 
-    async def apply_json(self, data):
+    async def apply_json(self, data: Union[List[Dict], Dict]) -> List[Dict]:
         """Apply a JSON data object for a service
         """
         if not isinstance(data, list):
