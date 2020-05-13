@@ -1,6 +1,9 @@
 import json
+from typing import Dict, List, Union
 
 from .utils import as_dict, as_params, uid
+
+JsonType = Union[Dict, List]
 
 
 class KongError(Exception):
@@ -16,10 +19,10 @@ class KongResponseError(KongError):
         self.message["response_status"] = response.status
 
     @property
-    def status(self):
+    def status(self) -> int:
         return self.response.status
 
-    def __str__(self):
+    def __str__(self) -> str:
         return json.dumps(self.message, indent=4)
 
 
@@ -34,7 +37,7 @@ class KongEntity:
     - SNI
     """
 
-    def __init__(self, root, data):
+    def __init__(self, root, data) -> None:
         self.root = root
         self.data = data
 
@@ -95,13 +98,13 @@ class CrudComponent:
         return f"{self.cli.url}/{self.name}"
 
     @property
-    def is_entity(self):
+    def is_entity(self) -> bool:
         return isinstance(self.root, KongEntity)
 
     def execute(self, url: str, method: str = None, **kwargs) -> object:
         return self.root.execute(url, method, **kwargs)
 
-    def apply_json(self, data):
+    def apply_json(self, data: JsonType, clear: bool = True):
         raise NotImplementedError
 
     async def paginate(self, **params):
