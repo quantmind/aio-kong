@@ -1,6 +1,6 @@
-from typing import Dict, List, Union
+from typing import List
 
-from .components import CrudComponent, KongError
+from .components import CrudComponent, JsonType, KongError
 from .plugins import KongEntityWithPlugins
 from .routes import Routes
 from .utils import local_ip
@@ -34,8 +34,8 @@ class Services(CrudComponent):
         await srv.plugins.delete_all()
         return await super().delete(id_)
 
-    async def apply_json(self, data: Union[List[Dict], Dict]) -> List[Dict]:
-        """Apply a JSON data object for a service
+    async def apply_json(self, data: JsonType, clear: bool = True) -> List:
+        """Apply a JSON data objects for services
         """
         if not isinstance(data, list):
             data = [data]
@@ -43,6 +43,7 @@ class Services(CrudComponent):
         for entry in data:
             if not isinstance(entry, dict):
                 raise KongError("dictionary required")
+            entry = entry.copy()
             ensure = entry.pop("ensure", None)
             name = entry.pop("name", None)
             routes = entry.pop("routes", [])
@@ -56,10 +57,6 @@ class Services(CrudComponent):
                 if await self.has(name):
                     await self.delete(name)
                 continue
-            # backward compatible with config entry
-            config = entry.pop("config", None)
-            if isinstance(config, dict):
-                entry.update(config)
             if await self.has(name):
                 srv = await self.update(name, host=host, **entry)
             else:

@@ -1,4 +1,3 @@
-import copy
 import os
 import sys
 from typing import Any, Callable, Dict, Optional
@@ -24,7 +23,9 @@ class Kong:
     """Kong client
     """
 
-    url: str = os.environ.get("KONG_URL", "http://127.0.0.1:8001")
+    url: str = os.getenv(
+        "KONG_ADMIN_URL", os.getenv("KONG_URL", "http://127.0.0.1:8001")
+    )
     content_type: str = "application/json, text/*; q=0.5"
 
     def __init__(
@@ -95,8 +96,7 @@ class Kong:
         data = await response.json()
         return wrap(data) if wrap else data
 
-    async def apply_json(self, config):
-        config = copy.deepcopy(config)
+    async def apply_json(self, config: Dict, clear: bool = True):
         if not isinstance(config, dict):
             raise KongError("Expected a dict got %s" % type(config).__name__)
         result = {}
@@ -106,7 +106,7 @@ class Kong:
             o = getattr(self, name)
             if not o:
                 raise KongError("Kong object %s not available" % name)
-            result[name] = await o.apply_json(data)
+            result[name] = await o.apply_json(data, clear=clear)
         return result
 
     async def delete_all(self) -> None:

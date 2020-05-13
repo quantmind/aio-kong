@@ -1,4 +1,4 @@
-from .components import CrudComponent, KongEntity, KongError
+from .components import CrudComponent, KongEntity, KongError, JsonType
 
 
 class Plugins(CrudComponent):
@@ -6,15 +6,16 @@ class Plugins(CrudComponent):
         params = await self.preprocess_parameters(params)
         return await super().create(**params)
 
-    async def apply_json(self, data):
+    async def apply_json(self, data: JsonType, clear: bool = True):
         if not isinstance(data, list):
             data = [data]
         plugins = await self.get_full_list()
         if not self.is_entity:
             plugins = [p for p in plugins if self.root_plugin(p)]
-        plugins = dict(((p["name"], p) for p in plugins))
+        plugins = {p["name"]: p for p in plugins}
         result = []
         for entry in data:
+            entry = entry.copy()
             name = entry.pop("name", None)
             if not name:
                 raise KongError("Plugin name not specified")
@@ -25,8 +26,10 @@ class Plugins(CrudComponent):
                 plugin = await self.create(name=name, **entry)
 
             result.append(plugin.data)
-        for entry in plugins.values():
-            await self.delete(entry["id"])
+        # left over plugins
+        if clear:
+            for entry in plugins.values():
+                await self.delete(entry["id"])
         return result
 
     def root_plugin(self, plugin):
