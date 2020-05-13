@@ -1,9 +1,10 @@
-import copy
 import os
-import typing
+import sys
+from typing import Any, Callable, Dict, Optional
 
-import aiohttp
+from aiohttp import ClientResponse, ClientSession
 
+from . import __version__
 from .certificates import Certificates
 from .components import CrudComponent, KongError, KongResponseError
 from .consumers import Consumers
@@ -13,21 +14,30 @@ from .snis import Snis
 
 __all__ = ["Kong", "KongError", "KongResponseError"]
 
+DEFAULT_USER_AGENT = (
+    f"Python/${'.'.join(map(str, sys.version_info[:2]))} aio-kong/${__version__}"
+)
+
 
 class Kong:
     """Kong client
     """
 
-    url = os.environ.get("KONG_URL", "http://127.0.0.1:8001")
+    url: str = os.getenv(
+        "KONG_ADMIN_URL", os.getenv("KONG_URL", "http://127.0.0.1:8001")
+    )
+    content_type: str = "application/json, text/*; q=0.5"
 
     def __init__(
         self,
         url: str = None,
-        session: typing.Any = None,
-        request_kwargs: typing.Dict = None,
+        session: Optional[ClientSession] = None,
+        request_kwargs: Optional[Dict] = None,
+        user_agent: str = DEFAULT_USER_AGENT,
     ) -> None:
         self.url = url or self.url
         self.session = session
+        self.user_agent = user_agent
         self.request_kwargs = request_kwargs or {}
         self.services = Services(self)
         self.plugins = Plugins(self)
@@ -42,7 +52,7 @@ class Kong:
     __str__ = __repr__
 
     @property
-    def cli(self):
+    def cli(self) -> "Kong":
         return self
 
     async def close(self) -> None:
@@ -57,21 +67,21 @@ class Kong:
 
     async def execute(
         self,
-        url,
-        method=None,
-        headers=None,
-        callback=None,
-        wrap=None,
+        url: str,
+        method: str = "",
+        headers: Optional[Dict[str, str]] = None,
+        callback: Optional[Callable[[ClientResponse], Any]] = None,
+        wrap: Optional[Callable[[Any], Any]] = None,
         timeout=None,
         **kw,
-    ):
+    ) -> Any:
         if not self.session:
-            self.session = aiohttp.ClientSession()
+            self.session = ClientSession()
         method = method or "GET"
-        headers = headers or {}
-        headers["Accept"] = "application/json, text/*; q=0.5"
+        headers_ = self.default_headers()
+        headers_.update(headers or ())
         kw.update(self.request_kwargs)
-        response = await self.session.request(method, url, headers=headers, **kw)
+        response = await self.session.request(method, url, headers=headers_, **kw)
         if callback:
             return await callback(response)
         if response.status == 204:
@@ -86,8 +96,7 @@ class Kong:
         data = await response.json()
         return wrap(data) if wrap else data
 
-    async def apply_json(self, config):
-        config = copy.deepcopy(config)
+    async def apply_json(self, config: Dict, clear: bool = True):
         if not isinstance(config, dict):
             raise KongError("Expected a dict got %s" % type(config).__name__)
         result = {}
@@ -97,11 +106,14 @@ class Kong:
             o = getattr(self, name)
             if not o:
                 raise KongError("Kong object %s not available" % name)
-            result[name] = await o.apply_json(data)
+            result[name] = await o.apply_json(data, clear=clear)
         return result
 
-    async def delete_all(self):
+    async def delete_all(self) -> None:
         await self.services.delete_all()
         await self.consumers.delete_all()
         await self.plugins.delete_all()
         await self.certificates.delete_all()
+
+    def default_headers(self) -> Dict[str, str]:
+        return {"user-agent": self.user_agent, "accept": self.content_type}

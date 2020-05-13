@@ -1,5 +1,7 @@
+from typing import List
+
 from .auths import auth_factory
-from .components import CrudComponent, KongError
+from .components import CrudComponent, JsonType, KongError
 from .plugins import KongEntityWithPlugins
 
 
@@ -12,13 +14,14 @@ class Consumers(CrudComponent):
             auth = auth_factory(consumer, auth_data["type"])
             await auth.create_or_update_credentials(auth_data["config"])
 
-    async def apply_json(self, data):
+    async def apply_json(self, data: JsonType, clear: bool = True) -> List:
         if not isinstance(data, list):
             data = [data]
         result = []
         for entry in data:
             if not isinstance(entry, dict):
                 raise KongError("dictionary required")
+            entry = entry.copy()
             groups = entry.pop("groups", [])
             auths = entry.pop("auths", [])
             udata = entry.copy()

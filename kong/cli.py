@@ -16,8 +16,11 @@ from .utils import local_ip
     "--key-auth", help="Create or display an authentication key for a consumer"
 )
 @click.option("--yaml", type=click.File("r"), help="Yaml configuration to upload")
+@click.option(
+    "--clear", default=False, is_flag=True, help="Clear objects not in configuration"
+)
 @click.pass_context
-def kong(ctx, version, ip, key_auth, yaml):
+def kong(ctx, version, ip, key_auth, yaml, clear: bool):
     if version:
         click.echo(__version__)
     elif ip:
@@ -25,7 +28,7 @@ def kong(ctx, version, ip, key_auth, yaml):
     elif key_auth:
         return _run(_auth_key(ctx, key_auth))
     elif yaml:
-        return _run(_yml(ctx, yaml))
+        return _run(_yml(ctx, yaml, clear))
     else:
         click.echo(ctx.get_help())
 
@@ -34,10 +37,10 @@ def _run(coro):
     return asyncio.get_event_loop().run_until_complete(coro)
 
 
-async def _yml(ctx, yaml):
+async def _yml(ctx, yaml, clear):
     async with Kong() as cli:
         try:
-            result = await cli.apply_json(_yaml.load(yaml, Loader=_yaml.FullLoader))
+            result = await cli.apply_json(_yaml.safe_load(yaml), clear=clear)
             click.echo(json.dumps(result, indent=4))
         except KongError as exc:
             raise click.ClickException(str(exc))

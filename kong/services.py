@@ -1,4 +1,6 @@
-from .components import CrudComponent, KongError
+from typing import List
+
+from .components import CrudComponent, JsonType, KongError
 from .plugins import KongEntityWithPlugins
 from .routes import Routes
 from .utils import local_ip
@@ -12,11 +14,11 @@ class Service(KongEntityWithPlugins):
     """
 
     @property
-    def routes(self):
+    def routes(self) -> Routes:
         return Routes(self)
 
     @property
-    def host(self):
+    def host(self) -> str:
         return self.data.get("host")
 
 
@@ -32,8 +34,8 @@ class Services(CrudComponent):
         await srv.plugins.delete_all()
         return await super().delete(id_)
 
-    async def apply_json(self, data):
-        """Apply a JSON data object for a service
+    async def apply_json(self, data: JsonType, clear: bool = True) -> List:
+        """Apply a JSON data objects for services
         """
         if not isinstance(data, list):
             data = [data]
@@ -41,6 +43,7 @@ class Services(CrudComponent):
         for entry in data:
             if not isinstance(entry, dict):
                 raise KongError("dictionary required")
+            entry = entry.copy()
             ensure = entry.pop("ensure", None)
             name = entry.pop("name", None)
             routes = entry.pop("routes", [])
@@ -54,10 +57,6 @@ class Services(CrudComponent):
                 if await self.has(name):
                     await self.delete(name)
                 continue
-            # backward compatible with config entry
-            config = entry.pop("config", None)
-            if isinstance(config, dict):
-                entry.update(config)
             if await self.has(name):
                 srv = await self.update(name, host=host, **entry)
             else:
