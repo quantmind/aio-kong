@@ -26,7 +26,6 @@ class Kong:
     url: str = os.getenv(
         "KONG_ADMIN_URL", os.getenv("KONG_URL", "http://127.0.0.1:8001")
     )
-    content_type: str = "application/json, text/*; q=0.5"
 
     def __init__(
         self,
@@ -34,10 +33,13 @@ class Kong:
         session: Optional[ClientSession] = None,
         request_kwargs: Optional[Dict] = None,
         user_agent: str = DEFAULT_USER_AGENT,
+        content_type: str = "application/json, text/*; q=0.5",
     ) -> None:
         self.url = url or self.url
         self.session = session
-        self.user_agent = user_agent
+        self.default_headers: Dict[str, str] = dict(
+            user_agents=user_agent, accept=content_type
+        )
         self.request_kwargs = request_kwargs or {}
         self.services = Services(self)
         self.plugins = Plugins(self)
@@ -78,7 +80,7 @@ class Kong:
         if not self.session:
             self.session = ClientSession()
         method = method or "GET"
-        headers_ = self.default_headers()
+        headers_ = self.default_headers.copy()
         headers_.update(headers or ())
         kw.update(self.request_kwargs)
         response = await self.session.request(method, url, headers=headers_, **kw)
@@ -114,6 +116,3 @@ class Kong:
         await self.consumers.delete_all()
         await self.plugins.delete_all()
         await self.certificates.delete_all()
-
-    def default_headers(self) -> Dict[str, str]:
-        return {"user-agent": self.user_agent, "accept": self.content_type}
