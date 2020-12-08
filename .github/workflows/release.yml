@@ -10,8 +10,6 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    needs:
-      - test
     env:
       PYTHON_ENV: ci
       PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
