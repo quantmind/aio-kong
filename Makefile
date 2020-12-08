@@ -62,17 +62,7 @@ test-version:		## validate version with pypi
 	@agilekit git validate
 
 release-github:		## new tag in github
-	@agilekit git release --yes
+	@GITHUB_TOKEN=$(QMBOT_TOKEN) agilekit git release --yes
 
 release-pypi:		## release to pypi and github tag
 	@twine upload dist/* --username lsbardel --password $(PYPI_PASSWORD)
-
-github-tag:		## new tag in github
-	@GITHUB_TOKEN=$(QMBOT_TOKEN) agilekit git release --yes
-
-pypi:			## release to pypi and github tag
-	@twine upload dist/* --username lsbardel --password $(PYPI_PASSWORD)
-
-release:		## release to pypi and github tag
-	make pypi
-	make github-tag
