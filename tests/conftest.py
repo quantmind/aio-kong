@@ -1,7 +1,7 @@
-import asyncio
-
 import aiohttp
+import asyncio
 import pytest
+
 from kong.client import Kong
 
 TESTS = ("test", "foo", "pippo")

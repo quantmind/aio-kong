@@ -1,6 +1,6 @@
 import json
-
 from click.testing import CliRunner
+
 from kong import __version__
 from kong.cli import kong
 from kong.utils import local_ip
