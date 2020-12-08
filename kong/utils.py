@@ -1,7 +1,6 @@
 import socket
-from uuid import UUID
-
 from multidict import MultiDict
+from uuid import UUID
 
 
 def as_list(key, data):

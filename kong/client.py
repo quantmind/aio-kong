@@ -1,14 +1,14 @@
 import os
 import sys
-from typing import Any, Callable, Dict, Optional
-
 from aiohttp import ClientResponse, ClientSession
+from typing import Any, Callable, Dict, Optional
 
 from . import __version__
 from .certificates import Certificates
 from .components import CrudComponent, KongError, KongResponseError
 from .consumers import Consumers
 from .plugins import Plugins
+from .routes import Routes
 from .services import Services
 from .snis import Snis
 
@@ -20,8 +20,7 @@ DEFAULT_USER_AGENT = (
 
 
 class Kong:
-    """Kong client
-    """
+    """Kong client"""
 
     url: str = os.getenv(
         "KONG_ADMIN_URL", os.getenv("KONG_URL", "http://127.0.0.1:8001")
@@ -40,6 +39,7 @@ class Kong:
         self.user_agent = user_agent
         self.request_kwargs = request_kwargs or {}
         self.services = Services(self)
+        self.routes = Routes(self)
         self.plugins = Plugins(self)
         self.consumers = Consumers(self)
         self.certificates = Certificates(self)

@@ -1,4 +1,4 @@
-from .components import CrudComponent, KongEntity, KongError, JsonType
+from .components import CrudComponent, JsonType, KongEntity, KongError
 
 
 class Plugins(CrudComponent):

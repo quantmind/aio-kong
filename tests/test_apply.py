@@ -1,7 +1,7 @@
 import os
-
 import pytest
 import yaml
+
 from kong.client import KongError
 
 PATH = os.path.dirname(__file__)

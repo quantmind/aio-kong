@@ -7,8 +7,7 @@ class Snis(CrudComponent):
     """Kong SNI API component"""
 
     async def apply_json(self, data: JsonType, clear: bool = True) -> List:
-        """Apply a JSON data objects for snis - never clear them
-        """
+        """Apply a JSON data objects for snis - never clear them"""
         if not isinstance(data, list):
             data = [data]
         result = []
