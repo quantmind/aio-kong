@@ -1,7 +1,6 @@
 import asyncio
-import json
-
 import click
+import json
 import yaml as _yaml
 
 from . import __version__

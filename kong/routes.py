@@ -14,7 +14,7 @@ class Routes(CrudComponent):
 
     Entity = KongEntityWithPlugins
 
-    async def delete(self, id_: str):
+    async def delete(self, id_: str) -> bool:
         route = self.wrap({"id": id_})
         await route.plugins.delete_all()
         return await super().delete(id_)

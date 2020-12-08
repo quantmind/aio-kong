@@ -10,8 +10,7 @@ LOCAL_HOST = frozenset(("localhost", "127.0.0.1"))
 
 
 class Service(KongEntityWithPlugins):
-    """Object representing a Kong service
-    """
+    """Object representing a Kong service"""
 
     @property
     def routes(self) -> Routes:
@@ -23,8 +22,7 @@ class Service(KongEntityWithPlugins):
 
 
 class Services(CrudComponent):
-    """Kong Services
-    """
+    """Kong Services"""
 
     Entity = Service
 
@@ -35,8 +33,7 @@ class Services(CrudComponent):
         return await super().delete(id_)
 
     async def apply_json(self, data: JsonType, clear: bool = True) -> List:
-        """Apply a JSON data objects for services
-        """
+        """Apply a JSON data objects for services"""
         if not isinstance(data, list):
             data = [data]
         result = []

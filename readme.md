@@ -50,6 +50,8 @@ async with Kong() as cli:
     print(json.dumps([s.data for s in services], indent=4))
 ```
 
+By default the url is obtained from the "KONG_ADMIN_URL" environment variable which defaults to http://127.0.0.1:8001.
+
 The client has handlers for all Kong objects
 
 - `cli.services` CRUD operations on services
