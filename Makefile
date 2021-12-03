@@ -56,8 +56,8 @@ test:			## run tests
 test-codecov:		## upload code coverage
 	@codecov --token $(CODECOV_TOKEN) --file ./build/coverage.xml
 
-test-version:		## validate version with pypi
-	@agilekit git validate
+test-version:		## check version compatibility
+	@./dev/test-version
 
 release-github:		## new tag in github
 	@GITHUB_TOKEN=$(QMBOT_TOKEN) agilekit git release --yes

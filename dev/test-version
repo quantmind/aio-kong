@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+poetry=`poetry version`
+code=`poetry run python -c 'import kong; print(f"aio-kong {kong.__version__}")'`
+
+echo ${poetry}
+
+if [ "${poetry}" != "${code}" ]; then
+    echo "ERROR: poetry version ${poetry} different from code version ${code}"
+    exit 1
+fi
