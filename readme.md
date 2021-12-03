@@ -5,7 +5,7 @@
 [![Build](https://github.com/quantmind/aio-kong/workflows/build/badge.svg)](https://github.com/quantmind/aio-kong/actions?query=workflow%3Abuild)
 [![codecov](https://codecov.io/gh/quantmind/aio-kong/branch/master/graph/badge.svg)](https://codecov.io/gh/quantmind/aio-kong)
 
-Tested with [kong][] v2.0
+Tested with [kong][] v2.6
 
 ## Installation & Testing
 
@@ -79,4 +79,4 @@ The library install the `kongfig` command line tool for uploading kong configura
 kongfig --yaml config.yaml
 ```
 
-[kong]: https://docs.konghq.com
+[kong]: https://github.com/Kong/kong
