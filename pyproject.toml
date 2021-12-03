@@ -4,6 +4,33 @@ version = "0.9.0"
 description = "Asynchronous Kong Client"
 authors = ["Luca <luca@quantmind.com>"]
 license = "BSD-3-Clause"
+readme = "readme.md"
+packages = [
+    {include = "kong"}
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: JavaScript",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development",
+    "Typing :: Typed",
+    "Framework :: AsyncIO",
+    "Environment :: Web Environment",
+]
+
+[tool.poetry.urls]
+"Repository" = "https://github.com/quantmind/aio-kong"
+"Issues" = "https://github.com/quantmind/aio-kong/issues"
 
 [tool.poetry.dependencies]
 python = "^3.8"
