@@ -28,19 +28,17 @@ clean:			## remove python cache files
 	rm -rf .mypy_cache
 	rm -rf .coverage
 
+
 install: 		## install packages in virtualenv
 	@./dev/install
 
+
 lint: 			## run linters
-	isort .
-	./dev/run-black
-	flake8
+	@./dev/lint-code
 
 
 lint-check: 		## run black check in CI
-	isort . --check
-	./dev/run-black --check
-	flake8
+	@./dev/lint-code --check
 
 
 version:		## display software version
@@ -53,7 +51,7 @@ services-ci:		## Starts CI services
 	@docker-compose -f ./dev/docker-compose.yml up --remove-orphans -d
 
 test:			## run tests
-	@pytest -x --cov --cov-report xml
+	@poetry run pytest -x --cov --cov-report xml
 
 test-codecov:		## upload code coverage
 	@codecov --token $(CODECOV_TOKEN) --file ./build/coverage.xml

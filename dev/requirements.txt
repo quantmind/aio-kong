@@ -1,5 +1,0 @@
-#
-# asyncio stack
-aiohttp
-click
-pyyaml

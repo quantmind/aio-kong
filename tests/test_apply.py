@@ -7,10 +7,14 @@ from kong.client import KongError
 PATH = os.path.dirname(__file__)
 
 
-async def test_json(cli):
-    with open(os.path.join(PATH, "test.yaml")) as fp:
-        manifest = yaml.load(fp)
+async def apply(cli, file_name):
+    with open(os.path.join(PATH, file_name)) as fp:
+        manifest = yaml.load(fp, Loader=yaml.FullLoader)
     await cli.apply_json(manifest)
+
+
+async def test_json(cli):
+    await apply(cli, "test.yaml")
     srv = await cli.services.get("foo")
     routes = await srv.routes.get_list()
     assert len(routes) == 2
@@ -21,9 +25,7 @@ async def test_json(cli):
 
 
 async def test_json2(cli):
-    with open(os.path.join(PATH, "test2.yaml")) as fp:
-        manifest = yaml.load(fp)
-    await cli.apply_json(manifest)
+    await apply(cli, "test2.yaml")
     srv = await cli.services.get("foo")
     routes = await srv.routes.get_list()
     assert len(routes) == 1
@@ -38,22 +40,18 @@ async def test_hedge_cases(cli):
         await cli.apply_json([])
 
     with pytest.raises(KongError):
-        with open(os.path.join(PATH, "test3.yaml")) as fp:
-            await cli.apply_json(yaml.load(fp))
+        await apply(cli, "test3.yaml")
 
     assert str(cli) == cli.url
 
 
 async def test_json_plugins(cli):
-    with open(os.path.join(PATH, "test4.yaml")) as fp:
-        await cli.apply_json(yaml.load(fp))
+    await apply(cli, "test4.yaml")
 
 
 async def test_json_route_plugins(cli):
-    with open(os.path.join(PATH, "test6.yaml")) as fp:
-        await cli.apply_json(yaml.load(fp))
-    with open(os.path.join(PATH, "test6.yaml")) as fp:
-        await cli.apply_json(yaml.load(fp))
+    await apply(cli, "test6.yaml")
+    await apply(cli, "test6.yaml")
     srv = await cli.services.get("pippo")
     plugins = await srv.plugins.get_list()
     assert len(plugins) == 1
@@ -65,8 +63,7 @@ async def test_json_route_plugins(cli):
     acls = await cs.acls.get_list()
     assert len(acls) == 2
 
-    with open(os.path.join(PATH, "test61.yaml")) as fp:
-        await cli.apply_json(yaml.load(fp))
+    await apply(cli, "test61.yaml")
     srv = await cli.services.get("pippo")
     plugins = await srv.plugins.get_list()
     assert len(plugins) == 0
@@ -80,8 +77,7 @@ async def test_json_route_plugins(cli):
 
 
 async def test_auth_handling(cli):
-    with open(os.path.join(PATH, "test_auth.yaml")) as fp:
-        await cli.apply_json(yaml.load(fp))
+    await apply(cli, "test_auth.yaml")
     consumer = await cli.consumers.get("admin")
 
     basic_auths = await consumer.basicauths.get_list()
@@ -93,10 +89,8 @@ async def test_auth_handling(cli):
 
 
 async def test_auth_overwrite(cli):
-    with open(os.path.join(PATH, "test_auth.yaml")) as fp:
-        await cli.apply_json(yaml.load(fp))
-    with open(os.path.join(PATH, "test_auth_overwrite.yaml")) as fp:
-        await cli.apply_json(yaml.load(fp))
+    await apply(cli, "test_auth.yaml")
+    await apply(cli, "test_auth_overwrite.yaml")
     consumer = await cli.consumers.get("admin")
 
     basic_auths = await consumer.basicauths.get_list()
@@ -108,12 +102,9 @@ async def test_auth_overwrite(cli):
 
 
 async def test_ensure_remove(cli):
-    with open(os.path.join(PATH, "test6.yaml")) as fp:
-        await cli.apply_json(yaml.load(fp))
+    await apply(cli, "test6.yaml")
     assert await cli.services.has("pippo") is True
-    with open(os.path.join(PATH, "test7.yaml")) as fp:
-        await cli.apply_json(yaml.load(fp))
+    await apply(cli, "test7.yaml")
     assert await cli.services.has("pippo") is False
-    with open(os.path.join(PATH, "test7.yaml")) as fp:
-        await cli.apply_json(yaml.load(fp))
+    await apply(cli, "test7.yaml")
     assert await cli.services.has("pippo") is False
