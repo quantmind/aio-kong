@@ -5,7 +5,7 @@
 [![Build](https://github.com/quantmind/aio-kong/workflows/build/badge.svg)](https://github.com/quantmind/aio-kong/actions?query=workflow%3Abuild)
 [![codecov](https://codecov.io/gh/quantmind/aio-kong/branch/master/graph/badge.svg)](https://codecov.io/gh/quantmind/aio-kong)
 
-Tested with [kong][] v2.6
+Tested with [kong][] v2.8
 
 ## Installation & Testing
 
