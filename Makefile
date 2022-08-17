@@ -44,7 +44,7 @@ services-ci:		## Starts CI services
 
 
 test:			## run tests
-	@poetry run pytest -x --cov --cov-report xml --cov-report html
+	@poetry run pytest -x -vvv --cov --cov-report xml --cov-report html
 
 
 test-codecov:		## upload code coverage
