@@ -4,6 +4,9 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/aio-kong.svg)](https://pypi.org/project/aio-kong)
 [![Build](https://github.com/quantmind/aio-kong/workflows/build/badge.svg)](https://github.com/quantmind/aio-kong/actions?query=workflow%3Abuild)
 [![codecov](https://codecov.io/gh/quantmind/aio-kong/branch/master/graph/badge.svg)](https://codecov.io/gh/quantmind/aio-kong)
+latest/?badge=latest)
+[![Downloads](https://img.shields.io/pypi/dd/aio-kong.svg)](https://pypi.org/project/aio-kong/)
+
 
 Tested with [kong][] v2.8
 
@@ -55,11 +58,10 @@ The client has handlers for all Kong objects
 
 - [cli.services](./kong/services.py) CRUD operations on services
 - [cli.routes](./kong/routes.py) CRUD operations on routes
-- `cli.plugins` CRUD operations on plugins
-- `cli.consumers` CRUD operations on consumers
-- `cli.consumers` CRUD operations on consumers
-- `cli.certificates` CRUD operations on TLS certificates
-- `cli.snis` CRUD operations on SNIs
+- [cli.plugins](./kong/plugins.py) CRUD operations on plugins
+- [cli.consumers](./kong/consumers.py) CRUD operations on consumers
+- [cli.certificates](./kong/certificates.py) CRUD operations on TLS certificates
+- [cli.snis](./kong/snis.py) CRUD operations on SNIs
 - `cli.acls` To list all ACLs
 
 ### Apply a configuration
