@@ -27,6 +27,10 @@ lint-check: 		## run black check in CI
 	@./dev/lint-code --check
 
 
+outdated:		## Show outdated packages
+	poetry show -o
+
+
 version:		## display software version
 	@python3 -c "import kong; print(kong.__version__)"
 
@@ -40,7 +44,7 @@ services-ci:		## Starts CI services
 
 
 test:			## run tests
-	@poetry run pytest -x --cov --cov-report xml
+	@poetry run pytest -x --cov --cov-report xml --cov-report html
 
 
 test-codecov:		## upload code coverage

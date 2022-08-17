@@ -1,4 +1,7 @@
 import os
+import pytest
+
+from kong.client import KongError
 
 PATH = os.path.join(os.path.dirname(__file__), "certificates")
 
@@ -22,6 +25,25 @@ async def test_create_service(cli):
     assert srv.plugins.root == srv
     assert str(srv)
     assert "id" in srv
+
+
+async def test_create_service_no_name(cli):
+    [srv] = await cli.services.apply_json(dict(host="example.upstream", port=8080))
+    assert srv.name == ""
+    assert srv.host == "example.upstream"
+    assert srv.id
+    assert srv.routes.root == srv
+    assert srv.plugins.root == srv
+    assert str(srv)
+    assert "id" in srv
+
+
+async def test_create_service_ensure_no_name(cli):
+    with pytest.raises(KongError) as e:
+        await cli.services.apply_json(
+            dict(ensure="remove", host="example.upstream", port=8080)
+        )
+    assert str(e.value) == "Service name or id is required to remove previous services"
 
 
 async def test_update_service(cli):

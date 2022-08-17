@@ -58,12 +58,12 @@ class KongEntity:
         return self.root.cli
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self.data["id"]
 
     @property
-    def name(self):
-        return self.data.get("name", "")
+    def name(self) -> str:
+        return self.data.get("name") or ""
 
     @property
     def url(self):

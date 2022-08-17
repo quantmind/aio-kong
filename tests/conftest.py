@@ -8,17 +8,19 @@ TESTS = ("test", "foo", "pippo")
 CONSUMERS = ("an-xxxx-test", "test-xx", "test-yy")
 
 
-@pytest.fixture(autouse=True)
-def loop():
+@pytest.fixture(scope="module", autouse=True)
+def event_loop():
     """Return an instance of the event loop."""
     loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
+    try:
+        yield loop
+    finally:
+        loop.close()
 
 
 @pytest.fixture()
-async def cli(loop):
-    session = aiohttp.ClientSession(loop=loop)
+async def cli():
+    session = aiohttp.ClientSession()
     async with Kong(session=session) as cli:
         await cli.delete_all()
         yield cli

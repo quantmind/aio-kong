@@ -32,7 +32,7 @@ class Services(CrudComponent):
         await srv.plugins.delete_all()
         return await super().delete(id_)
 
-    async def apply_json(self, data: JsonType, clear: bool = True) -> List:
+    async def apply_json(self, data: JsonType, clear: bool = True) -> List[Service]:
         """Apply a JSON data objects for services"""
         if not isinstance(data, list):
             data = [data]
@@ -43,22 +43,31 @@ class Services(CrudComponent):
             entry = entry.copy()
             ensure = entry.pop("ensure", None)
             name = entry.pop("name", None)
+            id_ = entry.pop("id", None)
+            id_or_name = name or id_
             routes = entry.pop("routes", [])
             plugins = entry.pop("plugins", [])
             host = entry.pop("host", None)
             if host in LOCAL_HOST:
                 host = local_ip()
-            if not name:
-                raise KongError("Service name is required")
             if ensure in REMOVE:
-                if await self.has(name):
-                    await self.delete(name)
+                if not id_or_name:
+                    raise KongError(
+                        "Service name or id is required to remove previous services"
+                    )
+                if await self.has(id_or_name):
+                    await self.delete(id_or_name)
                 continue
-            if await self.has(name):
-                srv = await self.update(name, host=host, **entry)
+            entry.update(host=host)
+            if id_or_name and await self.has(id_or_name):
+                if id_ and name:
+                    entry.update(name=name)
+                srv = await self.update(id_or_name, **entry)
             else:
-                srv = await self.create(name=name, host=host, **entry)
+                if name:
+                    entry.update(name=name)
+                srv = await self.create(**entry)
             srv.data["routes"] = await srv.routes.apply_json(routes)
             srv.data["plugins"] = await srv.plugins.apply_json(plugins)
-            result.append(srv.data)
+            result.append(srv)
         return result
