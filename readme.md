@@ -18,8 +18,7 @@ pip install aio-kong
 To run tests, clone and
 
 ```
-./dev/install.sh
-pytest --cov
+make test
 ```
 
 :warning: If you don't have Kong or postgres running locally, run the services first
@@ -47,15 +46,15 @@ In a coroutine:
 ```python
 async with Kong() as cli:
     services = await cli.services.get_list()
-    print(json.dumps([s.data for s in services], indent=4))
+    print(json.dumps([s.data for s in services], indent=2))
 ```
 
 By default the url is obtained from the "KONG_ADMIN_URL" environment variable which defaults to http://127.0.0.1:8001.
 
 The client has handlers for all Kong objects
 
-- `cli.services` CRUD operations on services
-- `cli.routes` CRUD operations on routes
+- [cli.services](./kong/services.py) CRUD operations on services
+- [cli.routes](./kong/routes.py) CRUD operations on routes
 - `cli.plugins` CRUD operations on plugins
 - `cli.consumers` CRUD operations on consumers
 - `cli.consumers` CRUD operations on consumers
