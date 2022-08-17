@@ -1,4 +1,7 @@
 import os
+import pytest
+
+from kong.client import KongError
 
 PATH = os.path.join(os.path.dirname(__file__), "certificates")
 
@@ -33,6 +36,11 @@ async def test_create_service_no_name(cli):
     assert srv.plugins.root == srv
     assert str(srv)
     assert "id" in srv
+
+
+async def test_create_service_ensure_no_name(cli):
+    with pytest.raises(KongError):
+        await cli.services.create(ensure="remove", host="example.upstream", port=8080)
 
 
 async def test_update_service(cli):
