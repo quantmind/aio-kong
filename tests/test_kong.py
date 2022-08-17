@@ -28,7 +28,7 @@ async def test_create_service(cli):
 
 
 async def test_create_service_no_name(cli):
-    srv = await cli.services.create(host="example.upstream", port=8080)
+    [srv] = await cli.services.apply_json(dict(host="example.upstream", port=8080))
     assert srv.name == ""
     assert srv.host == "example.upstream"
     assert srv.id
@@ -39,8 +39,11 @@ async def test_create_service_no_name(cli):
 
 
 async def test_create_service_ensure_no_name(cli):
-    with pytest.raises(KongError):
-        await cli.services.create(ensure="remove", host="example.upstream", port=8080)
+    with pytest.raises(KongError) as e:
+        await cli.services.apply_json(
+            dict(ensure="remove", host="example.upstream", port=8080)
+        )
+    assert str(e.value) == "Service name or id is required to remove previous services"
 
 
 async def test_update_service(cli):

@@ -32,7 +32,7 @@ class Services(CrudComponent):
         await srv.plugins.delete_all()
         return await super().delete(id_)
 
-    async def apply_json(self, data: JsonType, clear: bool = True) -> List:
+    async def apply_json(self, data: JsonType, clear: bool = True) -> List[Service]:
         """Apply a JSON data objects for services"""
         if not isinstance(data, list):
             data = [data]
@@ -69,5 +69,5 @@ class Services(CrudComponent):
                 srv = await self.create(**entry)
             srv.data["routes"] = await srv.routes.apply_json(routes)
             srv.data["plugins"] = await srv.plugins.apply_json(plugins)
-            result.append(srv.data)
+            result.append(srv)
         return result
