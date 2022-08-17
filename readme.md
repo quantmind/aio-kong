@@ -4,7 +4,6 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/aio-kong.svg)](https://pypi.org/project/aio-kong)
 [![Build](https://github.com/quantmind/aio-kong/workflows/build/badge.svg)](https://github.com/quantmind/aio-kong/actions?query=workflow%3Abuild)
 [![codecov](https://codecov.io/gh/quantmind/aio-kong/branch/master/graph/badge.svg)](https://codecov.io/gh/quantmind/aio-kong)
-latest/?badge=latest)
 [![Downloads](https://img.shields.io/pypi/dd/aio-kong.svg)](https://pypi.org/project/aio-kong/)
 
 
