@@ -24,6 +24,17 @@ async def test_create_service(cli):
     assert "id" in srv
 
 
+async def test_create_service_no_name(cli):
+    srv = await cli.services.create(host="example.upstream", port=8080)
+    assert srv.name == ""
+    assert srv.host == "example.upstream"
+    assert srv.id
+    assert srv.routes.root == srv
+    assert srv.plugins.root == srv
+    assert str(srv)
+    assert "id" in srv
+
+
 async def test_update_service(cli):
     await cli.services.create(name="test", host="example.upstream", port=8080)
     c = await cli.services.update("test", host="test.upstream")

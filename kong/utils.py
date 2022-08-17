@@ -1,9 +1,10 @@
 import socket
 from multidict import MultiDict
+from typing import Any, Dict, Optional, Union
 from uuid import UUID
 
 
-def as_list(key, data):
+def as_list(key: str, data: Dict) -> Dict:
     v = data.get(key)
     if isinstance(v, str):
         v = [v]
@@ -13,11 +14,11 @@ def as_list(key, data):
     return data
 
 
-def as_dict(data, key="data"):
+def as_dict(data: Any, key: str = "data") -> Dict:
     return {key: data} if not isinstance(data, dict) else data
 
 
-def local_ip():
+def local_ip() -> str:
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
     try:
@@ -26,14 +27,14 @@ def local_ip():
         s.close()
 
 
-def as_params(*, params=None, **kwargs):
-    params = MultiDict(params if params is not None else {})
-    params.update(kwargs)
-    return params
+def as_params(*, params: Optional[Dict] = None, **kwargs: Dict) -> MultiDict:
+    mp: MultiDict = MultiDict(params if params is not None else {})
+    mp.update(kwargs)
+    return mp
 
 
-def uid(id_):
+def uid(id_: Union[str, UUID]) -> str:
     try:
         return str(UUID(id_))
     except ValueError:
-        return id_
+        return str(id_)
