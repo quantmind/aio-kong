@@ -12,8 +12,8 @@ async def async_passthrough(response) -> Dict:
     return response[1]
 
 
-async def test_request_kwargs(loop):
-    session = aiohttp.ClientSession(loop=loop)
+async def test_request_kwargs():
+    session = aiohttp.ClientSession()
     cli = Kong(session=session, request_kwargs=dict(ssl=False))
     cli.session.request = async_mock
     kwargs = await cli.execute("...", callback=async_passthrough, bla="foo")

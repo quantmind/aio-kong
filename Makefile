@@ -27,6 +27,10 @@ lint-check: 		## run black check in CI
 	@./dev/lint-code --check
 
 
+outdated:		## Show outdated packages
+	poetry show -o
+
+	
 version:		## display software version
 	@python3 -c "import kong; print(kong.__version__)"
 
