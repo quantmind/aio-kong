@@ -5,12 +5,11 @@ from uuid import UUID
 
 
 def as_list(key: str, data: Dict) -> Dict:
-    v = data.get(key)
-    if isinstance(v, str):
-        v = [v]
-    elif not isinstance(v, list):
-        v = []
-    data[key] = v
+    if key in data:
+        v = data[key]
+        if isinstance(v, str):
+            v = [v]
+        data[key] = list(v)
     return data
 
 
