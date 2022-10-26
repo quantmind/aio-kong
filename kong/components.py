@@ -11,7 +11,7 @@ class KongError(Exception):
 
 
 class KongResponseError(KongError):
-    def __init__(self, response, message=""):
+    def __init__(self, response, message="") -> None:
         self.response = response
         self.message = as_dict(message, "message")
         self.message["request_url"] = str(response.url)
@@ -79,7 +79,7 @@ class KongEntity:
 class CrudComponent:
     Entity = KongEntity
 
-    def __init__(self, root: object, name: str = None) -> None:
+    def __init__(self, root: KongEntity, name: str = "") -> None:
         self.root = root
         self.name = name or self.__class__.__name__.lower()
 
