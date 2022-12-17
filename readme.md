@@ -7,7 +7,7 @@
 [![Downloads](https://img.shields.io/pypi/dd/aio-kong.svg)](https://pypi.org/project/aio-kong/)
 
 
-Tested with [kong][] v2.8
+Tested with [kong][] v3.1
 
 ## Installation & Testing
 
