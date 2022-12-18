@@ -1,12 +1,14 @@
-from .auths import auth_factory, ConsumerAuth
-from .components import CrudComponent, JsonType, KongError
+from typing import cast
+
+from .auths import ConsumerAuth, auth_factory
+from .components import CrudComponent, JsonType, KongError, KongResponseError
 from .plugins import KongEntityWithPlugins
 
 
 class Consumer(KongEntityWithPlugins):
     @property
     def username(self) -> str:
-        return self.data.get("username")
+        return self.data.get("username", "")
 
     @property
     def acls(self) -> CrudComponent:
@@ -50,17 +52,18 @@ class Consumers(CrudComponent):
                 username = udata.pop("username", None)
                 if not username:
                     raise KongError("Consumer username or id is required")
-            uid = id_ or username
+            uid = cast(str, id_ or username)
             try:
-                consumer = await self.get(uid)
-            except KongError as exc:
+                entity = await self.get(uid)
+            except KongResponseError as exc:
                 if exc.status == 404:
-                    consumer = await self.create(**entry)
+                    entity = await self.create(**entry)
                 else:
                     raise
             else:
                 if entry:
-                    consumer = await self.update(uid, **udata)
+                    entity = await self.update(uid, **udata)
+            consumer = cast(Consumer, entity)
             acls = await consumer.acls.get_list()
             current_groups = dict(((a["group"], a) for a in acls))
             for group in groups:

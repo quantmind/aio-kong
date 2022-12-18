@@ -4,4 +4,4 @@ set -e
 isort kong tests $1
 black kong tests $1
 flake8
-mypy kong tests
+mypy kong

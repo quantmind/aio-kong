@@ -92,7 +92,7 @@ class KongEntity(Mapping[str, Any]):
 class CrudComponent:
     Entity = KongEntity
 
-    def __init__(self, root: KongEntity, name: str = "") -> None:
+    def __init__(self, root: Kong | KongEntity, name: str = "") -> None:
         self.root = root
         self.name = name or self.__class__.__name__.lower()
 
@@ -155,9 +155,9 @@ class CrudComponent:
         url = f"{self.url}/{uid(id_)}"
         return await self.execute(url, "patch", json=params, wrap=self.wrap)
 
-    async def delete(self, id_: str | UUID) -> None:
+    async def delete(self, id_: str | UUID) -> bool:
         url = f"{self.url}/{uid(id_)}"
-        await self.execute(url, "delete")
+        return await self.execute(url, "delete")
 
     async def delete_all(self) -> int:
         n = 0

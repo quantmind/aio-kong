@@ -2,9 +2,11 @@ import asyncio
 import click
 import json
 import yaml as _yaml
+from typing import Any, cast
 
 from . import __version__
 from .client import Kong, KongError
+from .consumers import Consumer
 from .utils import local_ip
 
 
@@ -19,24 +21,31 @@ from .utils import local_ip
     "--clear", default=False, is_flag=True, help="Clear objects not in configuration"
 )
 @click.pass_context
-def kong(ctx, version, ip, key_auth, yaml, clear: bool):
+def kong(
+    ctx: click.Context,
+    version: bool,
+    ip: bool,
+    key_auth: str,
+    yaml: click.File | None,
+    clear: bool,
+) -> None:
     if version:
         click.echo(__version__)
     elif ip:
         click.echo(local_ip())
     elif key_auth:
-        return _run(_auth_key(ctx, key_auth))
+        _run(_auth_key(key_auth))
     elif yaml:
-        return _run(_yml(ctx, yaml, clear))
+        _run(_yml(yaml, clear))
     else:
         click.echo(ctx.get_help())
 
 
-def _run(coro):
-    return asyncio.get_event_loop().run_until_complete(coro)
+def _run(coro: Any) -> None:
+    asyncio.get_event_loop().run_until_complete(coro)
 
 
-async def _yml(ctx, yaml, clear):
+async def _yml(yaml: Any, clear: bool) -> None:
     async with Kong() as cli:
         try:
             result = await cli.apply_json(_yaml.safe_load(yaml), clear=clear)
@@ -45,10 +54,10 @@ async def _yml(ctx, yaml, clear):
             raise click.ClickException(str(exc))
 
 
-async def _auth_key(ctx, consumer):
+async def _auth_key(consumer: str) -> None:
     async with Kong() as cli:
         try:
-            c = await cli.consumers.get(consumer)
+            c = cast(Consumer, await cli.consumers.get(consumer))
             keys = await c.keyauths.get_list()
             if keys:
                 key = keys[0]
@@ -59,5 +68,5 @@ async def _auth_key(ctx, consumer):
             raise click.ClickException(str(exc))
 
 
-def main():  # pragma    nocover
+def main() -> None:  # pragma    nocover
     kong()
