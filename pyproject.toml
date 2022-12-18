@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aio-kong"
-version = "2.8.2"
+version = "3.0.0"
 description = "Asynchronous Kong Client"
 authors = ["Luca <luca@quantmind.com>"]
 license = "BSD-3-Clause"
