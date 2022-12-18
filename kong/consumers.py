@@ -1,20 +1,41 @@
-from typing import List
+from typing import cast
 
-from .auths import auth_factory
-from .components import CrudComponent, JsonType, KongError
+from .auths import ConsumerAuth, auth_factory
+from .components import CrudComponent, JsonType, KongError, KongResponseError
 from .plugins import KongEntityWithPlugins
 
 
-class Consumers(CrudComponent):
-    def wrap(self, data):
-        return Consumer(self, data)
+class Consumer(KongEntityWithPlugins):
+    @property
+    def username(self) -> str:
+        return self.data.get("username", "")
 
-    async def apply_credentials(self, auths, consumer):
+    @property
+    def acls(self) -> CrudComponent:
+        return CrudComponent(self, "acls")
+
+    @property
+    def jwts(self) -> ConsumerAuth:
+        return auth_factory(self, "jwt")
+
+    @property
+    def keyauths(self) -> ConsumerAuth:
+        return auth_factory(self, "key-auth")
+
+    @property
+    def basicauths(self) -> ConsumerAuth:
+        return auth_factory(self, "basic-auth")
+
+
+class Consumers(CrudComponent):
+    Entity = Consumer
+
+    async def apply_credentials(self, auths: list[dict], consumer: Consumer) -> None:
         for auth_data in auths:
             auth = auth_factory(consumer, auth_data["type"])
             await auth.create_or_update_credentials(auth_data["config"])
 
-    async def apply_json(self, data: JsonType, clear: bool = True) -> List:
+    async def apply_json(self, data: JsonType, clear: bool = True) -> list:
         if not isinstance(data, list):
             data = [data]
         result = []
@@ -31,17 +52,18 @@ class Consumers(CrudComponent):
                 username = udata.pop("username", None)
                 if not username:
                     raise KongError("Consumer username or id is required")
-            uid = id_ or username
+            uid = cast(str, id_ or username)
             try:
-                consumer = await self.get(uid)
-            except KongError as exc:
+                entity = await self.get(uid)
+            except KongResponseError as exc:
                 if exc.status == 404:
-                    consumer = await self.create(**entry)
+                    entity = await self.create(**entry)
                 else:
                     raise
             else:
                 if entry:
-                    consumer = await self.update(uid, **udata)
+                    entity = await self.update(uid, **udata)
+            consumer = cast(Consumer, entity)
             acls = await consumer.acls.get_list()
             current_groups = dict(((a["group"], a) for a in acls))
             for group in groups:
@@ -58,25 +80,3 @@ class Consumers(CrudComponent):
             result.append(consumer.data)
 
         return result
-
-
-class Consumer(KongEntityWithPlugins):
-    @property
-    def username(self):
-        return self.data.get("username")
-
-    @property
-    def acls(self):
-        return CrudComponent(self, "acls")
-
-    @property
-    def jwts(self):
-        return auth_factory(self, "jwt")
-
-    @property
-    def keyauths(self):
-        return auth_factory(self, "key-auth")
-
-    @property
-    def basicauths(self):
-        return auth_factory(self, "basic-auth")

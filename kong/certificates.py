@@ -4,7 +4,7 @@ from .snis import Snis
 
 class Certificate(KongEntity):
     @property
-    def snis(self):
+    def snis(self) -> Snis:
         return Snis(self)
 
 

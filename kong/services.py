@@ -1,6 +1,6 @@
-from typing import List
+from typing import cast
 
-from .components import CrudComponent, JsonType, KongError
+from .components import UUID, CrudComponent, JsonType, KongError
 from .plugins import KongEntityWithPlugins
 from .routes import Routes
 from .utils import local_ip
@@ -18,7 +18,7 @@ class Service(KongEntityWithPlugins):
 
     @property
     def host(self) -> str:
-        return self.data.get("host")
+        return self.data.get("host", "")
 
 
 class Services(CrudComponent):
@@ -26,13 +26,13 @@ class Services(CrudComponent):
 
     Entity = Service
 
-    async def delete(self, id_):
-        srv = self.wrap({"id": id_})
+    async def delete(self, id_: str | UUID) -> bool:
+        srv = cast(Service, self.wrap({"id": id_}))
         await srv.routes.delete_all()
         await srv.plugins.delete_all()
         return await super().delete(id_)
 
-    async def apply_json(self, data: JsonType, clear: bool = True) -> List[Service]:
+    async def apply_json(self, data: JsonType, clear: bool = True) -> list:
         """Apply a JSON data objects for services"""
         if not isinstance(data, list):
             data = [data]
@@ -62,11 +62,12 @@ class Services(CrudComponent):
             if id_or_name and await self.has(id_or_name):
                 if id_ and name:
                     entry.update(name=name)
-                srv = await self.update(id_or_name, **entry)
+                entity = await self.update(id_or_name, **entry)
             else:
                 if name:
                     entry.update(name=name)
-                srv = await self.create(**entry)
+                entity = await self.create(**entry)
+            srv = cast(Service, entity)
             srv.data["routes"] = await srv.routes.apply_json(routes)
             srv.data["plugins"] = await srv.plugins.apply_json(plugins)
             result.append(srv)

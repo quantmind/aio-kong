@@ -1,9 +1,16 @@
+from __future__ import annotations
+
 import json
-from typing import Dict, List, Union
+from aiohttp import ClientResponse
+from typing import TYPE_CHECKING, Any, AsyncIterator, Iterator, Mapping
 
-from .utils import as_dict, as_params, uid
+from .utils import UUID, as_dict, as_params, uid
 
-JsonType = Union[Dict, List]
+if TYPE_CHECKING:
+    from .client import Kong
+
+
+JsonType = dict | list
 
 
 class KongError(Exception):
@@ -11,7 +18,7 @@ class KongError(Exception):
 
 
 class KongResponseError(KongError):
-    def __init__(self, response, message="") -> None:
+    def __init__(self, response: ClientResponse, message: str = "") -> None:
         self.response = response
         self.message = as_dict(message, "message")
         self.message["request_url"] = str(response.url)
@@ -26,7 +33,7 @@ class KongResponseError(KongError):
         return json.dumps(self.message, indent=4)
 
 
-class KongEntity:
+class KongEntity(Mapping[str, Any]):
     """A Kong entity is either a
 
     - Service
@@ -37,7 +44,7 @@ class KongEntity:
     - SNI
     """
 
-    def __init__(self, root, data) -> None:
+    def __init__(self, root: Kong | CrudComponent, data: dict[str, Any]) -> None:
         self.root = root
         self.data = data
 
@@ -47,14 +54,20 @@ class KongEntity:
     def __str__(self) -> str:
         return self.__repr__()
 
-    def __getitem__(self, item):
+    def __len__(self) -> int:
+        return len(self.data)
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self.data)
+
+    def __getitem__(self, item: Any) -> Any:
         return self.data[item]
 
-    def __contains__(self, item):
+    def __contains__(self, item: Any) -> bool:
         return item in self.data
 
     @property
-    def cli(self):
+    def cli(self) -> Kong:
         return self.root.cli
 
     @property
@@ -66,20 +79,20 @@ class KongEntity:
         return self.data.get("name") or ""
 
     @property
-    def url(self):
+    def url(self) -> str:
         return "%s/%s" % (self.root.url, self.id)
 
-    def get(self, item, default=None):
+    def get(self, item: Any, default: Any = None) -> Any:
         return self.data.get(item, default)
 
-    def execute(self, url, method=None, **params):
-        return self.root.execute(url, method, **params)
+    async def execute(self, url: str, method: str = "", **params: Any) -> Any:
+        return await self.root.execute(url, method, **params)
 
 
 class CrudComponent:
     Entity = KongEntity
 
-    def __init__(self, root: KongEntity, name: str = "") -> None:
+    def __init__(self, root: Kong | KongEntity, name: str = "") -> None:
         self.root = root
         self.name = name or self.__class__.__name__.lower()
 
@@ -90,7 +103,7 @@ class CrudComponent:
         return self.__repr__()
 
     @property
-    def cli(self):
+    def cli(self) -> Kong:
         return self.root.cli
 
     @property
@@ -101,50 +114,50 @@ class CrudComponent:
     def is_entity(self) -> bool:
         return isinstance(self.root, KongEntity)
 
-    def execute(self, url: str, method: str = None, **kwargs) -> object:
-        return self.root.execute(url, method, **kwargs)
+    async def execute(self, url: str, method: str = "", **kwargs: Any) -> Any:
+        return await self.root.execute(url, method, **kwargs)
 
-    def apply_json(self, data: JsonType, clear: bool = True):
+    async def apply_json(self, data: JsonType, clear: bool = True) -> list:
         raise NotImplementedError
 
-    async def paginate(self, **params):
+    async def paginate(self, **params: Any) -> AsyncIterator[KongEntity]:
         url = self.list_create_url()
         next_ = url
-        params = as_params(**params)
+        exec_params = as_params(**params)
         while next_:
             if not next_.startswith(url):
                 next_ = f'{url}?{next_.split("?")[1]}'
-            data = await self.execute(next_, params=params)
+            data = await self.execute(next_, params=exec_params)
             next_ = data.get("next")
             for d in data["data"]:
                 yield self.wrap(d)
 
-    def get_list(self, **params):
+    async def get_list(self, **params: Any) -> list[KongEntity]:
         url = self.list_create_url()
-        return self.execute(url, params=as_params(**params), wrap=self.wrap_list)
+        return await self.execute(url, params=as_params(**params), wrap=self.wrap_list)
 
-    async def get_full_list(self, **params):
+    async def get_full_list(self, **params: Any) -> list[KongEntity]:
         return [d async for d in self.paginate(**params)]
 
-    def get(self, id_):
+    async def get(self, id_: str | UUID) -> KongEntity:
         url = f"{self.url}/{uid(id_)}"
-        return self.execute(url, wrap=self.wrap)
+        return await self.execute(url, wrap=self.wrap)
 
-    def has(self, id_):
+    async def has(self, id_: str | UUID) -> bool:
         url = f"{self.url}/{uid(id_)}"
-        return self.execute(url, "get", callback=self.head)
+        return await self.execute(url, "get", callback=self.head)
 
-    def create(self, **params):
+    async def create(self, **params: Any) -> KongEntity:
         url = self.list_create_url()
-        return self.execute(url, "post", json=params, wrap=self.wrap)
+        return await self.execute(url, "post", json=params, wrap=self.wrap)
 
-    def update(self, id_, **params):
+    async def update(self, id_: str | UUID, **params: Any) -> KongEntity:
         url = f"{self.url}/{uid(id_)}"
-        return self.execute(url, "patch", json=params, wrap=self.wrap)
+        return await self.execute(url, "patch", json=params, wrap=self.wrap)
 
-    def delete(self, id_):
+    async def delete(self, id_: str | UUID) -> bool:
         url = f"{self.url}/{uid(id_)}"
-        return self.execute(url, "delete")
+        return await self.execute(url, "delete")
 
     async def delete_all(self) -> int:
         n = 0
@@ -153,7 +166,7 @@ class CrudComponent:
             n += 1
         return n
 
-    async def head(self, response):
+    async def head(self, response: ClientResponse) -> bool:
         if response.status == 404:
             return False
         elif response.status == 200:
@@ -161,10 +174,10 @@ class CrudComponent:
         else:  # pragma: no cover
             raise KongResponseError(response)
 
-    def wrap(self, data):
+    def wrap(self, data: dict) -> KongEntity:
         return self.Entity(self, data)
 
-    def wrap_list(self, data):
+    def wrap_list(self, data: dict) -> list[KongEntity]:
         return [self.wrap(d) for d in data["data"]]
 
     def list_create_url(self) -> str:

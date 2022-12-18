@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import sys
 from aiohttp import ClientResponse, ClientSession
@@ -29,9 +31,9 @@ class Kong:
 
     def __init__(
         self,
-        url: str = None,
-        session: Optional[ClientSession] = None,
-        request_kwargs: Optional[Dict] = None,
+        url: str = "",
+        session: ClientSession | None = None,
+        request_kwargs: dict | None = None,
         user_agent: str = DEFAULT_USER_AGENT,
     ) -> None:
         self.url = url or self.url
@@ -59,21 +61,20 @@ class Kong:
         if self.session:
             await self.session.close()
 
-    async def __aenter__(self) -> object:
+    async def __aenter__(self) -> Kong:
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(self, exc_type: type, exc_val: Any, exc_tb: Any) -> None:
         await self.close()
 
     async def execute(
         self,
         url: str,
         method: str = "",
-        headers: Optional[Dict[str, str]] = None,
+        headers: dict[str, str] | None = None,
         callback: Optional[Callable[[ClientResponse], Any]] = None,
         wrap: Optional[Callable[[Any], Any]] = None,
-        timeout=None,
-        **kw,
+        **kw: Any,
     ) -> Any:
         if not self.session:
             self.session = ClientSession()
@@ -96,7 +97,7 @@ class Kong:
         data = await response.json()
         return wrap(data) if wrap else data
 
-    async def apply_json(self, config: Dict, clear: bool = True):
+    async def apply_json(self, config: dict, clear: bool = True) -> dict:
         if not isinstance(config, dict):
             raise KongError("Expected a dict got %s" % type(config).__name__)
         result = {}

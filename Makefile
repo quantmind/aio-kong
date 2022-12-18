@@ -20,11 +20,11 @@ install: 		## install packages in virtualenv
 
 
 lint: 			## run linters
-	@./dev/lint-code
+	@poetry run ./dev/lint-code
 
 
 lint-check: 		## run black check in CI
-	@./dev/lint-code --check
+	@poetry run ./dev/lint-code --check
 
 
 outdated:		## Show outdated packages
@@ -32,7 +32,7 @@ outdated:		## Show outdated packages
 
 
 version:		## display software version
-	@python3 -c "import kong; print(kong.__version__)"
+	@poetry run python -c "import kong; print(kong.__version__)"
 
 
 services:		## Starts services

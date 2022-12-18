@@ -1,7 +1,7 @@
 from itertools import zip_longest
-from typing import List
+from typing import cast
 
-from .components import CrudComponent, JsonType
+from .components import UUID, CrudComponent, JsonType
 from .plugins import KongEntityWithPlugins
 from .utils import as_list
 
@@ -14,12 +14,12 @@ class Routes(CrudComponent):
 
     Entity = KongEntityWithPlugins
 
-    async def delete(self, id_: str) -> bool:
-        route = self.wrap({"id": id_})
+    async def delete(self, id_: str | UUID) -> bool:
+        route = cast(KongEntityWithPlugins, self.wrap({"id": id_}))
         await route.plugins.delete_all()
         return await super().delete(id_)
 
-    async def apply_json(self, data: JsonType, clear: bool = True) -> List:
+    async def apply_json(self, data: JsonType, clear: bool = True) -> list:
         if not isinstance(data, list):
             data = [data]
         routes = await self.get_list()
@@ -35,9 +35,10 @@ class Routes(CrudComponent):
             as_list("paths", entry)
             as_list("methods", entry)
             if not route:
-                route = await self.create(**entry)
+                entity = await self.create(**entry)
             else:
-                route = await self.update(route.id, **entry)
+                entity = await self.update(route.id, **entry)
+            route = cast(KongEntityWithPlugins, entity)
             route.data["plugins"] = await route.plugins.apply_json(plugins)
             result.append(route.data)
         return result
