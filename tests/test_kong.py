@@ -94,7 +94,7 @@ async def test_snis(cli):
     # CREATE
     for sni in snis:
         sni.pop("created_at")
-        sni.pop("updated_at")
+        sni.pop("updated_at", None)
         sni.pop("id")
     print(config["snis"])
     print(snis)
@@ -108,7 +108,7 @@ async def test_snis(cli):
 
     for sni in snis:
         sni.pop("created_at")
-        sni.pop("updated_at")
+        sni.pop("updated_at", None)
         sni.pop("id")
     assert snis == config["snis"]
 
