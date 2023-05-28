@@ -54,7 +54,7 @@ class Kong:
     __str__ = __repr__
 
     @property
-    def cli(self) -> "Kong":
+    def cli(self) -> Kong:
         return self
 
     async def close(self) -> None:

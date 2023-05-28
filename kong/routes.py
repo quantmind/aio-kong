@@ -1,4 +1,3 @@
-from itertools import zip_longest
 from typing import cast
 
 from .components import UUID, CrudComponent, JsonType
@@ -19,16 +18,15 @@ class Routes(CrudComponent):
         await route.plugins.delete_all()
         return await super().delete(id_)
 
-    async def apply_json(self, data: JsonType, clear: bool = True) -> list:
+    async def apply_json(self, data: JsonType, clear: bool = True) -> list[dict]:
         if not isinstance(data, list):
             data = [data]
         routes = await self.get_list()
+        route_map = {r.name: r for r in routes}
         result = []
-        for entry, route in zip_longest(data, routes):
-            if not entry:
-                if route and clear:
-                    await self.delete(route.id)
-                continue
+        for entry in data:
+            name = entry.get("name")
+            route = route_map.pop(name, None) if name else None
             entry = entry.copy()
             plugins = entry.pop("plugins", [])
             as_list("hosts", entry)
@@ -41,4 +39,7 @@ class Routes(CrudComponent):
             route = cast(KongEntityWithPlugins, entity)
             route.data["plugins"] = await route.plugins.apply_json(plugins)
             result.append(route.data)
+        if clear:
+            for route in route_map.values():
+                await self.delete(route.id)
         return result
