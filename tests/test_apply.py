@@ -2,7 +2,7 @@ import os
 import pytest
 import yaml
 
-from kong.client import KongError
+from kong.client import Kong, KongError
 
 PATH = os.path.dirname(__file__)
 
@@ -49,7 +49,7 @@ async def test_json_plugins(cli):
     await apply(cli, "test4.yaml")
 
 
-async def test_json_route_plugins(cli):
+async def test_json_route_plugins(cli: Kong):
     await apply(cli, "test6.yaml")
     await apply(cli, "test6.yaml")
     srv = await cli.services.get("pippo")
@@ -62,6 +62,9 @@ async def test_json_route_plugins(cli):
     cs = await cli.consumers.get("an-xxxx-test")
     acls = await cs.acls.get_list()
     assert len(acls) == 2
+    plugin_map = {p.name: p for p in plugins}
+    termination = plugin_map["request-termination"]
+    assert termination["consumer"]
 
     await apply(cli, "test61.yaml")
     srv = await cli.services.get("pippo")

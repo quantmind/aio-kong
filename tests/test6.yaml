@@ -24,7 +24,7 @@ services:
               anonymous: an-xxxx-test
           - name: request-termination
             consumer:
-              id: 71021cd0-d63f-4459-a872-b365cc4f231d
+              username: an-xxxx-test
             config:
               status_code: 403
               message: requires authentication
