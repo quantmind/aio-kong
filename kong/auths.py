@@ -15,7 +15,6 @@ def auth_factory(consumer: Consumer, auth_type: str) -> ConsumerAuth:
 
 
 class ConsumerAuth(CrudComponent):
-
     unique_field: str = ""
 
     @property

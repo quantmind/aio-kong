@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHON_ENV: ci
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
 
     strategy:
@@ -37,7 +36,10 @@ jobs:
         run: make test
       - name: upload coverage
         if: matrix.python-version == '3.11'
-        run: make test-codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./build/coverage.xml
       - name: publish
         if: ${{ matrix.python-version == '3.11' && github.event.head_commit.message == 'release' }}
         run: make publish

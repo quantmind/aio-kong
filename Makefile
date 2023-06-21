@@ -20,11 +20,11 @@ install: 		## install packages in virtualenv
 
 
 lint: 			## run linters
-	@poetry run ./dev/lint-code
+	@poetry run ./dev/lint-code fix
 
 
 lint-check: 		## run black check in CI
-	@poetry run ./dev/lint-code --check
+	@poetry run ./dev/lint-code
 
 
 outdated:		## Show outdated packages
