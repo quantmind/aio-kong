@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
 set -e
 
-isort kong tests $1
-black kong tests $1
-flake8
+BLACK_ARG="--check"
+RUFF_ARG=""
+
+if [ "$1" = "fix" ] ; then
+    BLACK_ARG=""
+    RUFF_ARG="--fix"
+fi
+
+echo "run black"
+black kong tests ${BLACK_ARG}
+echo "run ruff"
+ruff kong tests ${RUFF_ARG}
+echo "run mypy"
 mypy kong

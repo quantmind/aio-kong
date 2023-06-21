@@ -32,10 +32,9 @@ class Routes(CrudComponent):
             as_list("hosts", entry)
             as_list("paths", entry)
             as_list("methods", entry)
-            if not route:
-                entity = await self.create(**entry)
-            else:
-                entity = await self.update(route.id, **entry)
+            if route:
+                await self.delete(route.id)
+            entity = await self.create(**entry)
             route = cast(KongEntityWithPlugins, entity)
             route.data["plugins"] = await route.plugins.apply_json(plugins)
             result.append(route.data)
