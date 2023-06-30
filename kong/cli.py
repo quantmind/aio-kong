@@ -66,7 +66,3 @@ async def _auth_key(consumer: str) -> None:
             click.echo(json.dumps(key.data, indent=4))
         except KongError as exc:
             raise click.ClickException(str(exc))
-
-
-def main() -> None:  # pragma    nocover
-    kong()

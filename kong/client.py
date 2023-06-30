@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import os
 import sys
-from aiohttp import ClientResponse, ClientSession
 from typing import Any, Callable, Dict, Optional
+
+from aiohttp import ClientResponse, ClientSession
 
 from . import __version__
 from .certificates import Certificates
@@ -17,7 +18,7 @@ from .snis import Snis
 __all__ = ["Kong", "KongError", "KongResponseError"]
 
 DEFAULT_USER_AGENT = (
-    f"Python/${'.'.join(map(str, sys.version_info[:2]))} aio-kong/${__version__}"
+    f"Python/{'.'.join(map(str, sys.version_info[:2]))} aio-kong/{__version__}"
 )
 
 
