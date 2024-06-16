@@ -56,4 +56,4 @@ test-version:		## check version compatibility
 
 
 publish:		## release to pypi and github tag
-	@poetry publish --build -u lsbardel -p $(PYPI_PASSWORD)
+	@poetry publish --build -u __token__ -p $(PYPI_TOKEN)
