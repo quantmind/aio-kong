@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import json
-from aiohttp import ClientResponse
 from typing import TYPE_CHECKING, Any, AsyncIterator, Iterator, Mapping
+
+from aiohttp import ClientResponse
 
 from .utils import UUID, as_dict, as_params, uid
 

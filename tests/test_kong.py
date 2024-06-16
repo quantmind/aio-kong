@@ -1,4 +1,5 @@
 import os
+
 import pytest
 
 from kong.client import KongError
