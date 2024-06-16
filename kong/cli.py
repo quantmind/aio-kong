@@ -1,8 +1,9 @@
 import asyncio
-import click
 import json
-import yaml as _yaml
 from typing import Any, cast
+
+import click
+import yaml as _yaml
 
 from . import __version__
 from .client import Kong, KongError
@@ -51,7 +52,7 @@ async def _yml(yaml: Any, clear: bool) -> None:
             result = await cli.apply_json(_yaml.safe_load(yaml), clear=clear)
             click.echo(json.dumps(result, indent=4))
         except KongError as exc:
-            raise click.ClickException(str(exc))
+            raise click.ClickException(str(exc)) from None
 
 
 async def _auth_key(consumer: str) -> None:
@@ -65,4 +66,4 @@ async def _auth_key(consumer: str) -> None:
                 key = await c.keyauths.create()
             click.echo(json.dumps(key.data, indent=4))
         except KongError as exc:
-            raise click.ClickException(str(exc))
+            raise click.ClickException(str(exc)) from None

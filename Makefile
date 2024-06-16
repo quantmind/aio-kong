@@ -28,7 +28,7 @@ lint-check: 		## run black check in CI
 
 
 outdated:		## Show outdated packages
-	poetry show -o
+	poetry show -o -a
 
 
 version:		## display software version

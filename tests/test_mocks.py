@@ -1,5 +1,6 @@
-import aiohttp
 from typing import Dict, Tuple
+
+import aiohttp
 
 from kong.client import Kong
 

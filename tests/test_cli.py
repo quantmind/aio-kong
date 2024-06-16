@@ -1,4 +1,5 @@
 import json
+
 from click.testing import CliRunner
 
 from kong import __version__

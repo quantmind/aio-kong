@@ -1,7 +1,8 @@
 import socket
-from multidict import MultiDict
 from typing import Any
 from uuid import UUID
+
+from multidict import MultiDict
 
 
 def as_list(key: str, data: dict) -> dict:
