@@ -14,7 +14,7 @@ services:
     command: ["postgres", "-c", "fsync=off", "-c", "full_page_writes=off"]
 
   kong-migration-bootstrap:
-    image: kong:3.7
+    image: kong:3.8
     restart: on-failure
     depends_on:
       - kong-database
