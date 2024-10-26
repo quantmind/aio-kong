@@ -1,5 +1,3 @@
-version: "3"
-
 services:
 
   kong-database:
@@ -31,7 +29,7 @@ services:
       KONG_ADMIN_LISTEN: 0.0.0.0:8001
 
   kong-migration-up:
-    image: kong:3.3
+    image: kong:3.8
     restart: on-failure
     depends_on:
       - kong-database
@@ -47,7 +45,7 @@ services:
       KONG_ADMIN_LISTEN: 0.0.0.0:8001
 
   kong:
-    image: kong:3.3
+    image: kong:3.8
     restart: always
     depends_on:
       - kong-database
