@@ -1,7 +1,11 @@
-from .components import CrudComponent, JsonType
+from .components import CrudComponent, JsonType, KongEntity
 
 
-class Snis(CrudComponent):
+class Sni(KongEntity):
+    pass
+
+
+class Snis(CrudComponent[Sni]):
     """Kong SNI API component"""
 
     async def apply_json(self, data: JsonType, clear: bool = True) -> list:

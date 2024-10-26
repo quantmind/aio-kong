@@ -2,7 +2,7 @@ from typing import cast
 
 from .components import UUID, CrudComponent, JsonType, KongError
 from .plugins import KongEntityWithPlugins
-from .routes import Routes
+from .routes import Route, Routes
 from .utils import local_ip
 
 REMOVE = frozenset(("absent", "remove"))
@@ -14,17 +14,15 @@ class Service(KongEntityWithPlugins):
 
     @property
     def routes(self) -> Routes:
-        return Routes(self)
+        return Routes(self, Route)
 
     @property
     def host(self) -> str:
         return self.data.get("host", "")
 
 
-class Services(CrudComponent):
+class Services(CrudComponent[Service]):
     """Kong Services"""
-
-    Entity = Service
 
     async def delete(self, id_: str | UUID) -> bool:
         srv = cast(Service, self.wrap({"id": id_}))

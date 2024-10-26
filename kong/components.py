@@ -1,7 +1,15 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, AsyncIterator, Iterator, Mapping
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    AsyncIterator,
+    Generic,
+    Iterator,
+    Mapping,
+    TypeVar,
+)
 
 from aiohttp import ClientResponse
 
@@ -90,11 +98,16 @@ class KongEntity(Mapping[str, Any]):
         return await self.root.execute(url, method, **params)
 
 
-class CrudComponent:
-    Entity = KongEntity
+Entity = TypeVar("Entity", bound=KongEntity)
 
-    def __init__(self, root: Kong | KongEntity, name: str = "") -> None:
+
+class CrudComponent(Generic[Entity]):
+
+    def __init__(
+        self, root: Kong | KongEntity, factory: type[Entity], name: str = ""
+    ) -> None:
         self.root = root
+        self.factory = factory
         self.name = name or self.__class__.__name__.lower()
 
     def __repr__(self) -> str:
@@ -121,7 +134,7 @@ class CrudComponent:
     async def apply_json(self, data: JsonType, clear: bool = True) -> list:
         raise NotImplementedError
 
-    async def paginate(self, **params: Any) -> AsyncIterator[KongEntity]:
+    async def paginate(self, **params: Any) -> AsyncIterator[Entity]:
         url = self.list_create_url()
         next_ = url
         exec_params = as_params(**params)
@@ -133,14 +146,14 @@ class CrudComponent:
             for d in data["data"]:
                 yield self.wrap(d)
 
-    async def get_list(self, **params: Any) -> list[KongEntity]:
+    async def get_list(self, **params: Any) -> list[Entity]:
         url = self.list_create_url()
         return await self.execute(url, params=as_params(**params), wrap=self.wrap_list)
 
-    async def get_full_list(self, **params: Any) -> list[KongEntity]:
+    async def get_full_list(self, **params: Any) -> list[Entity]:
         return [d async for d in self.paginate(**params)]
 
-    async def get(self, id_: str | UUID) -> KongEntity:
+    async def get(self, id_: str | UUID) -> Entity:
         url = f"{self.url}/{uid(id_)}"
         return await self.execute(url, wrap=self.wrap)
 
@@ -148,11 +161,11 @@ class CrudComponent:
         url = f"{self.url}/{uid(id_)}"
         return await self.execute(url, "get", callback=self.head)
 
-    async def create(self, **params: Any) -> KongEntity:
+    async def create(self, **params: Any) -> Entity:
         url = self.list_create_url()
         return await self.execute(url, "post", json=params, wrap=self.wrap)
 
-    async def update(self, id_: str | UUID, **params: Any) -> KongEntity:
+    async def update(self, id_: str | UUID, **params: Any) -> Entity:
         url = f"{self.url}/{uid(id_)}"
         return await self.execute(url, "patch", json=params, wrap=self.wrap)
 
@@ -175,10 +188,10 @@ class CrudComponent:
         else:  # pragma: no cover
             raise KongResponseError(response)
 
-    def wrap(self, data: dict) -> KongEntity:
-        return self.Entity(self, data)
+    def wrap(self, data: dict) -> Entity:
+        return self.factory(self, data)
 
-    def wrap_list(self, data: dict) -> list[KongEntity]:
+    def wrap_list(self, data: dict) -> list[Entity]:
         return [self.wrap(d) for d in data["data"]]
 
     def list_create_url(self) -> str:

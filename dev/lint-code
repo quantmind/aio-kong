@@ -14,4 +14,4 @@ black kong tests ${BLACK_ARG}
 echo "run ruff"
 ruff check kong tests ${RUFF_ARG}
 echo "run mypy"
-mypy kong
+mypy kong tests

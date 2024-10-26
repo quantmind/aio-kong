@@ -1,4 +1,4 @@
-import asyncio
+from typing import AsyncIterator
 
 import aiohttp
 import pytest
@@ -11,18 +11,8 @@ TESTS = ("test", "foo", "pippo")
 CONSUMERS = ("an-xxxx-test", "test-xx", "test-yy")
 
 
-@pytest.fixture(scope="module", autouse=True)
-def event_loop():
-    """Return an instance of the event loop."""
-    loop = asyncio.new_event_loop()
-    try:
-        yield loop
-    finally:
-        loop.close()
-
-
 @pytest.fixture
-async def cli() -> Kong:
+async def cli() -> AsyncIterator[Kong]:
     session = aiohttp.ClientSession()
     async with Kong(session=session) as cli:
         await cli.delete_all()

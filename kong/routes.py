@@ -5,13 +5,15 @@ from .plugins import KongEntityWithPlugins
 from .utils import as_list
 
 
+class Route(KongEntityWithPlugins):
+    pass
+
+
 class Routes(CrudComponent):
     """Kong Routes
 
     Routes are always associated with a Service
     """
-
-    Entity = KongEntityWithPlugins
 
     async def delete(self, id_: str | UUID) -> bool:
         route = cast(KongEntityWithPlugins, self.wrap({"id": id_}))

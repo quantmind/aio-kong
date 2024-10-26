@@ -8,8 +8,12 @@ if TYPE_CHECKING:
     from .client import Kong
 
 
-class Plugins(CrudComponent):
-    async def create(self, **params: Any) -> KongEntity:
+class Plugin(KongEntity):
+    pass
+
+
+class Plugins(CrudComponent[Plugin]):
+    async def create(self, **params: Any) -> Plugin:
         params = await self.preprocess_parameters(params)
         return await super().create(**params)
 
@@ -50,7 +54,7 @@ class Plugins(CrudComponent):
             params = await preprocessor(self.cli, params)
         return params
 
-    async def update(self, id_: str | UUID, **params: Any) -> KongEntity:
+    async def update(self, id_: str | UUID, **params: Any) -> Plugin:
         params = await self.preprocess_parameters(params)
         return await super().update(id_, **params)
 
@@ -58,7 +62,7 @@ class Plugins(CrudComponent):
 class KongEntityWithPlugins(KongEntity):
     @property
     def plugins(self) -> Plugins:
-        return Plugins(self)
+        return Plugins(self, Plugin)
 
 
 async def consumer_id_from_username(cli: Kong, params: dict) -> dict:
