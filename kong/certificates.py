@@ -1,14 +1,12 @@
 from .components import CrudComponent, KongEntity
-from .snis import Snis
+from .snis import Sni, Snis
 
 
 class Certificate(KongEntity):
     @property
     def snis(self) -> Snis:
-        return Snis(self)
+        return Snis(self, Sni)
 
 
-class Certificates(CrudComponent):
+class Certificates(CrudComponent[Certificate]):
     """Kong TLS certificate component"""
-
-    Entity = Certificate

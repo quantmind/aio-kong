@@ -7,18 +7,19 @@ from typing import Any, Callable, Dict, Optional
 from aiohttp import ClientResponse, ClientSession
 
 from . import __version__
-from .certificates import Certificates
-from .components import CrudComponent, KongError, KongResponseError
-from .consumers import Consumers
-from .plugins import Plugins
-from .routes import Routes
-from .services import Services
-from .snis import Snis
+from .acls import Acl, Acls
+from .certificates import Certificate, Certificates
+from .components import KongError, KongResponseError
+from .consumers import Consumer, Consumers
+from .plugins import Plugin, Plugins
+from .routes import Route, Routes
+from .services import Service, Services
+from .snis import Sni, Snis
 
 __all__ = ["Kong", "KongError", "KongResponseError"]
 
 DEFAULT_USER_AGENT = (
-    f"Python/{'.'.join(map(str, sys.version_info[:2]))} aio-kong/{__version__}"
+    f"python/{'.'.join(map(str, sys.version_info[:2]))} aio-kong/{__version__}"
 )
 
 
@@ -41,13 +42,13 @@ class Kong:
         self.session = session
         self.user_agent = user_agent
         self.request_kwargs = request_kwargs or {}
-        self.services = Services(self)
-        self.routes = Routes(self)
-        self.plugins = Plugins(self)
-        self.consumers = Consumers(self)
-        self.certificates = Certificates(self)
-        self.acls = CrudComponent(self, "acls")
-        self.snis = Snis(self)
+        self.services = Services(self, Service)
+        self.routes = Routes(self, Route)
+        self.plugins = Plugins(self, Plugin)
+        self.consumers = Consumers(self, Consumer)
+        self.certificates = Certificates(self, Certificate)
+        self.acls = Acls(self, Acl)
+        self.snis = Snis(self, Sni)
 
     def __repr__(self) -> str:
         return self.url

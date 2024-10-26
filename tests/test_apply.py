@@ -8,13 +8,13 @@ from kong.client import Kong, KongError
 PATH = os.path.dirname(__file__)
 
 
-async def apply(cli, file_name):
+async def apply(cli: Kong, file_name: str):
     with open(os.path.join(PATH, file_name)) as fp:
         manifest = yaml.load(fp, Loader=yaml.FullLoader)
     await cli.apply_json(manifest)
 
 
-async def test_json(cli):
+async def test_json(cli: Kong):
     await apply(cli, "test.yaml")
     srv = await cli.services.get("foo")
     routes = await srv.routes.get_list()
@@ -25,7 +25,7 @@ async def test_json(cli):
     assert len(plugins) == 2
 
 
-async def test_json2(cli):
+async def test_json2(cli: Kong):
     await apply(cli, "test2.yaml")
     srv = await cli.services.get("foo")
     routes = await srv.routes.get_list()
@@ -36,9 +36,9 @@ async def test_json2(cli):
     assert len(plugins) == 2
 
 
-async def test_hedge_cases(cli):
+async def test_hedge_cases(cli: Kong):
     with pytest.raises(KongError):
-        await cli.apply_json([])
+        await cli.apply_json([])  # type: ignore
 
     with pytest.raises(KongError):
         await apply(cli, "test3.yaml")
@@ -46,7 +46,7 @@ async def test_hedge_cases(cli):
     assert str(cli) == cli.url
 
 
-async def test_json_plugins(cli):
+async def test_json_plugins(cli: Kong):
     await apply(cli, "test4.yaml")
 
 
@@ -80,7 +80,7 @@ async def test_json_route_plugins(cli: Kong):
     assert len(acls) == 1
 
 
-async def test_auth_handling(cli):
+async def test_auth_handling(cli: Kong):
     await apply(cli, "test_auth.yaml")
     consumer = await cli.consumers.get("admin")
 
@@ -92,7 +92,7 @@ async def test_auth_handling(cli):
     assert len(key_auths) == 1
 
 
-async def test_auth_overwrite(cli):
+async def test_auth_overwrite(cli: Kong):
     await apply(cli, "test_auth.yaml")
     await apply(cli, "test_auth_overwrite.yaml")
     consumer = await cli.consumers.get("admin")
@@ -105,7 +105,7 @@ async def test_auth_overwrite(cli):
     assert len(key_auths) == 1
 
 
-async def test_ensure_remove(cli):
+async def test_ensure_remove(cli: Kong):
     await apply(cli, "test6.yaml")
     assert await cli.services.has("pippo") is True
     await apply(cli, "test7.yaml")

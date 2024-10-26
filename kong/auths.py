@@ -11,10 +11,14 @@ if TYPE_CHECKING:
 def auth_factory(consumer: Consumer, auth_type: str) -> ConsumerAuth:
     known_types = {"basic-auth": BasicAuth, "key-auth": KeyAuth}
     constructor = known_types.get(auth_type, ConsumerAuth)
-    return constructor(consumer, auth_type)
+    return constructor(consumer, Auth, auth_type)
 
 
-class ConsumerAuth(CrudComponent):
+class Auth(KongEntity):
+    pass
+
+
+class ConsumerAuth(CrudComponent[Auth]):
     unique_field: str = ""
 
     @property
@@ -37,13 +41,13 @@ class ConsumerAuth(CrudComponent):
         except StopIteration:
             return None
 
-    async def create_or_update_credentials(self, creds_config: dict) -> KongEntity:
+    async def create_or_update_credentials(self, creds_config: dict) -> Auth:
         if existing_id := await self.get_existing_id(creds_config):
             return await self.update_credentials(existing_id, data=creds_config)
         else:
             return await self.create_credentials(data=creds_config)
 
-    async def update_credentials(self, id_: str, **kw: Any) -> KongEntity:
+    async def update_credentials(self, id_: str, **kw: Any) -> Auth:
         url = f"{self.url}/{id_}"
 
         return await self.cli.execute(
@@ -54,7 +58,7 @@ class ConsumerAuth(CrudComponent):
             **kw,
         )
 
-    async def create_credentials(self, **kw: Any) -> KongEntity:
+    async def create_credentials(self, **kw: Any) -> Auth:
         return await self.cli.execute(
             self.url,
             "post",
@@ -63,7 +67,7 @@ class ConsumerAuth(CrudComponent):
             **kw,
         )
 
-    async def get_or_create(self) -> KongEntity:
+    async def get_or_create(self) -> Auth:
         secrets = await self.get_list(limit=1)
         return secrets[0] if secrets else await self.create()
 

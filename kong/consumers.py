@@ -1,5 +1,6 @@
 from typing import cast
 
+from .acls import Acl, Acls
 from .auths import ConsumerAuth, auth_factory
 from .components import CrudComponent, JsonType, KongError, KongResponseError
 from .plugins import KongEntityWithPlugins
@@ -11,8 +12,8 @@ class Consumer(KongEntityWithPlugins):
         return self.data.get("username", "")
 
     @property
-    def acls(self) -> CrudComponent:
-        return CrudComponent(self, "acls")
+    def acls(self) -> Acls:
+        return Acls(self, Acl)
 
     @property
     def jwts(self) -> ConsumerAuth:
@@ -27,8 +28,7 @@ class Consumer(KongEntityWithPlugins):
         return auth_factory(self, "basic-auth")
 
 
-class Consumers(CrudComponent):
-    Entity = Consumer
+class Consumers(CrudComponent[Consumer]):
 
     async def apply_credentials(self, auths: list[dict], consumer: Consumer) -> None:
         for auth_data in auths:
