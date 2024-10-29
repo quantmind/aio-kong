@@ -35,11 +35,15 @@ version:		## display software version
 
 .PHONY: services
 services:		## Starts services
-	@docker-compose -f ./dev/docker-compose.yml up --remove-orphans
+	@docker compose -f ./dev/docker-compose.yml up --remove-orphans
 
 .PHONY: services-ci
 services-ci:		## Starts CI services
-	@docker-compose -f ./dev/docker-compose.yml up --remove-orphans -d
+	@docker compose -f ./dev/docker-compose.yml up --remove-orphans -d
+
+.PHONY: services-stop
+services-stop:		## Stop services
+	@docker compose -f ./dev/docker-compose.yml stop
 
 .PHONY: test
 test:			## run tests
