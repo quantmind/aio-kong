@@ -9,7 +9,7 @@
 
 Tested with [kong][] v3.8
 
-## Installation & Testing
+## Installation
 
 To install the package
 
@@ -17,9 +17,12 @@ To install the package
 pip install aio-kong
 ```
 
-To run tests, clone and
+## Testing
+
+To run tests, clone the repository and
 
 ```
+make install
 make test
 ```
 
@@ -73,7 +76,15 @@ await cli.apply_json(config)
 
 ## Command line tool
 
-The library install the `kongfig` command line tool for uploading kong configuration files.
+The library can install the `kongfig` command line tool for uploading kong configuration files.
+
+For the command line tool to work, you need to install the package as:
+
+```bash
+pip install aio-kong[cli]
+```
+
+and to run the cli tool, you can use the following command:
 
 ```
 kongfig --yaml config.yaml
