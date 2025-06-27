@@ -63,6 +63,15 @@ def services(url: str, json: bool) -> None:
 
 
 @kong.command()
+@click.argument("service")
+@admin_url
+@as_json
+def routes(service: str, url: str, json: bool) -> None:
+    "Display routes for a service"
+    asyncio.run(_routes(service, url, as_json=json))
+
+
+@kong.command()
 @admin_url
 @as_json
 def consumers(url: str, json: bool) -> None:
@@ -106,6 +115,35 @@ async def _services(url: str, as_json: bool = False) -> None:
         console.print(table)
 
 
+async def _routes(service: str, url: str, as_json: bool = False) -> None:
+    async with Kong(url=url) as cli:
+        try:
+            svc = await cli.services.get(service)
+            routes = await svc.routes.get_full_list()
+        except KongError as exc:
+            raise click.ClickException(str(exc)) from None
+        if as_json:
+            display_json(routes)
+            return
+        table = Table(title="Services")
+        columns = [
+            "Name",
+            "Hosts",
+            "Protocols",
+            "Path",
+            "Tags",
+            "Strip Path",
+            "Preserve Host",
+            "ID",
+        ]
+        for column in columns:
+            table.add_column(column)
+        for s in sorted(routes, key=lambda s: s.name):
+            table.add_row(*[str_value(s.data, column) for column in columns])
+        console = Console()
+        console.print(table)
+
+
 async def _consumers(url: str, as_json: bool = False) -> None:
     async with Kong(url=url) as cli:
         try:
@@ -141,10 +179,15 @@ async def _auth_key(consumer: str, admin_url: str) -> None:
 
 def str_value(data: dict, key: str) -> str:
     key = key.lower().replace(" ", "_")
-    value = data.get(key) or ""
-    if isinstance(value, list):
+    value = data.get(key)
+    if value is None:
+        return ""
+    elif isinstance(value, bool):
+        return ":white_check_mark:" if value else "[red]:x:"
+    elif isinstance(value, list):
         return ", ".join(str(v) for v in value)
-    return str(value)
+    else:
+        return str(value)
 
 
 def display_json(data: Any) -> None:
