@@ -87,7 +87,7 @@ pip install aio-kong[cli]
 and to run the cli tool, you can use the following command:
 
 ```
-kongfig --yaml config.yaml
+kongfig --help
 ```
 
 [kong]: https://github.com/Kong/kong

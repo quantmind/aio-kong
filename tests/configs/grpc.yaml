@@ -1,0 +1,12 @@
+services:
+  - name: mygrpc
+    host: "mygrpc.local"
+    protocol: grpc
+    tags:
+      - public
+      - grpc
+    routes:
+      - hosts: "api.foo.com"
+        protocols:
+          - grpc
+          - grpcs

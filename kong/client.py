@@ -9,7 +9,7 @@ from aiohttp import ClientResponse, ClientSession
 from . import __version__
 from .acls import Acl, Acls
 from .certificates import Certificate, Certificates
-from .components import KongError, KongResponseError
+from .components import CrudComponent, KongError, KongResponseError
 from .consumers import Consumer, Consumers
 from .plugins import Plugin, Plugins
 from .routes import Route, Routes
@@ -23,22 +23,24 @@ DEFAULT_USER_AGENT = (
 )
 
 
+def default_admin_url() -> str:
+    """Return the default Kong admin URL."""
+    return os.getenv("KONG_ADMIN_URL", os.getenv("KONG_URL", "http://127.0.0.1:8001"))
+
+
 class Kong:
     """Kong client"""
 
-    url: str = os.getenv(
-        "KONG_ADMIN_URL", os.getenv("KONG_URL", "http://127.0.0.1:8001")
-    )
     content_type: str = "application/json, text/*; q=0.5"
 
     def __init__(
         self,
-        url: str = "",
+        url: str | None = None,
         session: ClientSession | None = None,
         request_kwargs: dict | None = None,
         user_agent: str = DEFAULT_USER_AGENT,
     ) -> None:
-        self.url = url or self.url
+        self.url = url or default_admin_url()
         self.session = session
         self.user_agent = user_agent
         self.request_kwargs = request_kwargs or {}
@@ -107,7 +109,7 @@ class Kong:
             if not isinstance(data, list):
                 data = [data]
             o = getattr(self, name)
-            if not o:
+            if not isinstance(o, CrudComponent):
                 raise KongError("Kong object %s not available" % name)
             result[name] = await o.apply_json(data, clear=clear)
         return result
