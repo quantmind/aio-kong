@@ -1,19 +1,20 @@
 [project]
 name = "aio-kong"
-version = "3.6.0"
+version = "3.7.0"
 description = "Asynchronous Kong Client"
 authors = [{ name = "Luca Sbardella", email = "luca@quantmind.com" }]
 license = "BSD-3-Clause"
 readme = "readme.md"
 requires-python = ">=3.10,<4.0"
 dependencies = [
-    "aiohttp>=3.9.5",
+    "aiohttp>=3.9.5"
 ]
 
 [project.optional-dependencies]
 cli = [
     "PyYAML>=6.0",
-    "click>=8.1.3"
+    "click>=8.1.3",
+    "rich (>=14.0.0,<15.0.0)"
 ]
 
 [project.scripts]

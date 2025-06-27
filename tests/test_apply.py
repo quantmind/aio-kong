@@ -1,15 +1,15 @@
-import os
+from pathlib import Path
 
 import pytest
 import yaml
 
 from kong.client import Kong, KongError
 
-PATH = os.path.dirname(__file__)
+PATH = Path(__file__).parent / "configs"
 
 
 async def apply(cli: Kong, file_name: str):
-    with open(os.path.join(PATH, file_name)) as fp:
+    with open(PATH / file_name) as fp:
         manifest = yaml.load(fp, Loader=yaml.FullLoader)
     await cli.apply_json(manifest)
 
@@ -112,3 +112,9 @@ async def test_ensure_remove(cli: Kong):
     assert await cli.services.has("pippo") is False
     await apply(cli, "test7.yaml")
     assert await cli.services.has("pippo") is False
+
+
+async def test_grpc(cli: Kong):
+    await apply(cli, "grpc.yaml")
+    srv = await cli.services.get("mygrpc")
+    assert srv.protocol == "grpc"

@@ -20,6 +20,10 @@ class Service(KongEntityWithPlugins):
     def host(self) -> str:
         return self.data.get("host", "")
 
+    @property
+    def protocol(self) -> str:
+        return self.data.get("protocol", "")
+
 
 class Services(CrudComponent[Service]):
     """Kong Services"""

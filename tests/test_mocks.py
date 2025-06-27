@@ -1,15 +1,13 @@
-from typing import Dict, Tuple
-
 import aiohttp
 
 from kong.client import Kong
 
 
-async def async_mock(*args, **kwargs) -> Tuple:
+async def async_mock(*args, **kwargs) -> tuple:
     return (args, kwargs)
 
 
-async def async_passthrough(response) -> Dict:
+async def async_passthrough(response) -> dict:
     return response[1]
 
 
