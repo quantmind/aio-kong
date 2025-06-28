@@ -55,11 +55,12 @@ def ip() -> None:
 
 
 @kong.command()
+@click.option("-d", "--delete", type=str, help="Delete a service by name")
 @admin_url
 @as_json
-def services(url: str, json: bool) -> None:
+def services(delete: str, url: str, json: bool) -> None:
     "Display services"
-    asyncio.run(_services(url, as_json=json))
+    asyncio.run(_services(url, as_json=json, delete=delete))
 
 
 @kong.command()
@@ -96,9 +97,13 @@ async def _yml(yaml: Any, clear: bool, url: str) -> None:
             raise click.ClickException(str(exc)) from None
 
 
-async def _services(url: str, as_json: bool = False) -> None:
+async def _services(url: str, as_json: bool = False, delete: str | None = None) -> None:
     async with Kong(url=url) as cli:
         try:
+            if delete:
+                await cli.services.delete(delete)
+                click.echo(f"Service '{delete}' deleted.")
+                return
             services = await cli.services.get_full_list()
         except KongError as exc:
             raise click.ClickException(str(exc)) from None

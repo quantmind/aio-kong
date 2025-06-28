@@ -90,4 +90,12 @@ and to run the cli tool, you can use the following command:
 kongfig --help
 ```
 
+
+## Environment variables
+
+The client uses the following environment variables:
+
+* `KONG_ADMIN_URL`: The URL of the Kong admin API. Defaults to `http://127.0.0.1:8001`.
+* `KONG_ADMIN_SSL`: Whether to use SSL validation for the Kong admin API. Defaults to `true`.
+
 [kong]: https://github.com/Kong/kong

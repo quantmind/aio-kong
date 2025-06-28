@@ -22,16 +22,27 @@ DEFAULT_USER_AGENT = (
     f"python/{'.'.join(map(str, sys.version_info[:2]))} aio-kong/{__version__}"
 )
 
+KONG_ADMIN_SSL = os.getenv("KONG_ADMIN_SSL", "true").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
 
 def default_admin_url() -> str:
     """Return the default Kong admin URL."""
     return os.getenv("KONG_ADMIN_URL", os.getenv("KONG_URL", "http://127.0.0.1:8001"))
 
 
+def kong_request_kwargs(request_kwargs: dict | None = None) -> dict:
+    kwargs = request_kwargs or {}
+    if "ssl" not in kwargs and not KONG_ADMIN_SSL:
+        kwargs["ssl"] = False
+    return kwargs
+
+
 class Kong:
     """Kong client"""
-
-    content_type: str = "application/json, text/*; q=0.5"
 
     def __init__(
         self,
@@ -39,11 +50,13 @@ class Kong:
         session: ClientSession | None = None,
         request_kwargs: dict | None = None,
         user_agent: str = DEFAULT_USER_AGENT,
+        content_type: str = "application/json, text/*; q=0.5",
     ) -> None:
         self.url = url or default_admin_url()
         self.session = session
         self.user_agent = user_agent
-        self.request_kwargs = request_kwargs or {}
+        self.content_type = content_type
+        self.request_kwargs = kong_request_kwargs(request_kwargs)
         self.services = Services(self, Service)
         self.routes = Routes(self, Route)
         self.plugins = Plugins(self, Plugin)

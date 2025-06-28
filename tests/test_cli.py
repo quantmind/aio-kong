@@ -86,3 +86,11 @@ def test_no_routes():
     runner = CliRunner()
     result = runner.invoke(kong, ["routes", "foox"])
     assert result.exit_code == 1
+
+
+def test_delete_service():
+    runner = CliRunner()
+    result = runner.invoke(kong, ["services", "-d", "foo"])
+    assert result.exit_code == 0
+    result = runner.invoke(kong, ["services", "-d", "foo"])
+    assert result.exit_code == 1

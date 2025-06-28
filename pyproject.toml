@@ -1,6 +1,6 @@
 [project]
 name = "aio-kong"
-version = "3.7.1"
+version = "3.7.2"
 description = "Asynchronous Kong Client"
 authors = [{ name = "Luca Sbardella", email = "luca@quantmind.com" }]
 license = "BSD-3-Clause"
