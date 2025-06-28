@@ -198,4 +198,6 @@ def display_json(data: Any) -> None:
 def kong_entity(obj: Any) -> Any:
     if isinstance(obj, KongEntity):
         return obj.data
-    raise TypeError(f"Cannot serialize {type(obj).__name__} to JSON")
+    raise TypeError(
+        f"Cannot serialize {type(obj).__name__} to JSON"
+    )  # pragma: no cover

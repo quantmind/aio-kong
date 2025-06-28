@@ -4,6 +4,7 @@ from typing import cast
 import pytest
 
 from kong.client import Kong, KongError
+from uuid import UUID
 
 PATH = os.path.join(os.path.dirname(__file__), "certificates")
 
@@ -27,6 +28,9 @@ async def test_create_service(cli: Kong):
     assert srv.plugins.root == srv
     assert str(srv)
     assert "id" in srv
+    srv2= await cli.services.get(UUID(srv.id))
+    assert srv2.name == "test"
+
 
 
 async def test_create_service_no_name(cli: Kong):

@@ -3,7 +3,7 @@ from typing import cast
 from .components import UUID, CrudComponent, JsonType, KongError
 from .plugins import KongEntityWithPlugins
 from .routes import Route, Routes
-from .utils import local_ip
+from .utils import local_ip, uid
 
 REMOVE = frozenset(("absent", "remove"))
 LOCAL_HOST = frozenset(("localhost", "127.0.0.1"))
@@ -29,7 +29,7 @@ class Services(CrudComponent[Service]):
     """Kong Services"""
 
     async def delete(self, id_: str | UUID) -> bool:
-        srv = cast(Service, self.wrap({"id": id_}))
+        srv = cast(Service, self.wrap({"id": uid(id_)}))
         await srv.routes.delete_all()
         await srv.plugins.delete_all()
         return await super().delete(id_)

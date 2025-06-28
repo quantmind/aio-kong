@@ -54,3 +54,35 @@ def test_key_auth():
     assert result.exit_code == 0
     data2 = json.loads(result.output.rstrip())
     assert data["key"] == data2["key"]
+
+
+def test_consumers():
+    runner = CliRunner()
+    result = runner.invoke(kong, ["consumers", "--json"])
+    assert result.exit_code == 0
+    result = runner.invoke(kong, ["consumers"])
+    assert result.exit_code == 0
+
+
+def test_services():
+    runner = CliRunner()
+    result = runner.invoke(kong, ["yaml", "tests/configs/test.yaml"])
+    assert result.exit_code == 0
+    result = runner.invoke(kong, ["services", "--json"])
+    assert result.exit_code == 0
+    result = runner.invoke(kong, ["services"])
+    assert result.exit_code == 0
+
+
+def test_routes():
+    runner = CliRunner()
+    result = runner.invoke(kong, ["routes", "foo", "--json"])
+    assert result.exit_code == 0
+    result = runner.invoke(kong, ["routes", "foo"])
+    assert result.exit_code == 0
+
+
+def test_no_routes():
+    runner = CliRunner()
+    result = runner.invoke(kong, ["routes", "foox"])
+    assert result.exit_code == 1
